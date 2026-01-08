@@ -2,19 +2,23 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Helper functions
+    // ============================================
+    // Helper Functions
+    // ============================================
+    
     function isAuthenticated() {
       return request.auth != null;
     }
     
     function isOwner() {
-      // Only these specific email addresses have owner access
+      // Owner check: only by email whitelist
       return isAuthenticated() && 
-             (request.auth.email == 'saaforge@gmail.com' ||
-              request.auth.email == 'emsaadsaad580@gmail.com');
+             (request.auth.token.email == 'saaforge@gmail.com' ||
+              request.auth.token.email == 'emsaadsaad580@gmail.com');
     }
     
-    function isTeamMember() {
+    function isApprovedTeamMember() {
+      // Team member with approved status
       return isAuthenticated() && 
              ((exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
                get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'team') ||
@@ -33,7 +37,10 @@ service cloud.firestore {
              profileDoc.data.isApproved == true;
     }
     
-    // Users collection
+    // ============================================
+    // Users Collection
+    // ============================================
+    // Stores user profiles with role assignment (owner | team)
     match /users/{userId} {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated() && request.auth.uid == userId;
@@ -41,14 +48,17 @@ service cloud.firestore {
       allow delete: if isOwner();
     }
     
-    // Team Profiles - Support both UID and email-based access
+    // ============================================
+    // Team Profiles Collection
+    // ============================================
+    // Detailed team member profiles with approval status
     match /teamProfiles/{profileId} {
       allow read: if isApprovedPublicProfile(resource) || 
                      (isAuthenticated() && request.auth.uid == profileId) ||
                      (isAuthenticated() && request.auth.token.email == profileId) ||
                      (isAuthenticated() && resource.data.userId == request.auth.uid) ||
                      isOwner() ||
-                     isTeamMember();
+                     isApprovedTeamMember();
       allow create: if isOwner() || (isAuthenticated() && request.auth.uid == profileId);
       allow update: if isSelfOrOwner(profileId) || (isAuthenticated() && request.auth.token.email == profileId) || (isAuthenticated() && resource.data.userId == request.auth.uid);
       allow delete: if isOwner() || 
@@ -56,94 +66,125 @@ service cloud.firestore {
                        (isAuthenticated() && request.auth.token.email == profileId) ||
                        (isAuthenticated() && resource.data.userId == request.auth.uid);
     }
-
-    // Owner Profiles
-    match /ownerProfiles/{profileId} {
-      allow read: if resource.data.isPubliclyVisible == true || 
-                     isAuthenticated();
-      allow create, update: if isOwner() && request.auth.uid == profileId;
-      allow delete: if isOwner();
-    }
     
-    // Join Requests
+    // ============================================
+    // Join Requests Collection
+    // ============================================
+    // Team join requests from new users
     match /joinRequests/{requestId} {
       allow read: if isOwner() || (isAuthenticated() && request.auth.uid == resource.data.userId);
-      allow create: if true; // Anyone can submit
+      allow create: if isAuthenticated();
       allow update: if isOwner();
       allow delete: if isOwner();
     }
     
-    // Invite Codes
+    // ============================================
+    // Invite Codes Collection
+    // ============================================
+    // Invite codes for team registration
     match /inviteCodes/{codeId} {
-      allow read: if true; // Need to verify codes during registration
+      allow read: if isAuthenticated();
       allow create: if isOwner();
       allow update: if isOwner() || (isAuthenticated() && resource.data.email == request.auth.token.email);
       allow delete: if isOwner();
     }
     
-    // Projects
+    // ============================================
+    // Owner Profiles Collection
+    // ============================================
+    // Owner profile information (separate from users collection)
+    match /ownerProfiles/{profileId} {
+      allow read: if resource.data.isPubliclyVisible == true || isAuthenticated();
+      allow create, update: if isOwner() && request.auth.uid == profileId;
+      allow delete: if isOwner();
+    }
+    
+    // ============================================
+    // Projects Collection
+    // ============================================
+    // Company projects with publication status
     match /projects/{projectId} {
-      allow read: if resource.data.isPublished == true || isOwner() || isTeamMember();
+      allow read: if resource.data.isPublished == true || isOwner() || isApprovedTeamMember();
       allow create: if isOwner();
       allow update: if isOwner();
       allow delete: if isOwner();
     }
     
-    // Orders
+    // ============================================
+    // Orders Collection
+    // ============================================
+    // Client service requests/orders
     match /orders/{orderId} {
       allow read: if isOwner();
-      allow create: if true; // Anyone can submit
+      allow create: if isAuthenticated();
       allow update: if isOwner();
       allow delete: if isOwner();
     }
     
-    // Site Content
+    // ============================================
+    // Site Content Collection
+    // ============================================
+    // CMS content for website sections
     match /siteContent/{contentId} {
-      allow read: if true; // Public read
+      allow read: if true;
       allow write: if isOwner();
     }
     
-    // Audit Logs
+    // ============================================
+    // Audit Logs Collection
+    // ============================================
+    // Immutable activity logs for compliance
     match /auditLogs/{logId} {
       allow read: if isOwner();
       allow create: if isAuthenticated();
-      allow update, delete: if false; // Audit logs are immutable
+      allow update, delete: if false;
     }
     
-    // Project Feedback
+    // ============================================
+    // Project Feedback Collection
+    // ============================================
+    // Public feedback on projects
     match /projectFeedback/{feedbackId} {
-      allow read: if isOwner() || isTeamMember() || resource.data.isPublic == true;
+      allow read: if isOwner() || isApprovedTeamMember() || resource.data.isApproved == true;
       allow create: if isAuthenticated();
       allow update: if isOwner();
       allow delete: if isOwner();
     }
     
-    // Tasks
+    // ============================================
+    // Tasks Collection
+    // ============================================
+    // Team tasks assigned by owner
     match /tasks/{taskId} {
-      allow read: if isOwner() || isTeamMember();
-      allow create, update, delete: if isOwner();
+      allow read: if isOwner() || isApprovedTeamMember();
+      allow create: if isOwner();
+      allow update: if isOwner() || (isAuthenticated() && request.auth.uid == resource.data.assignedTo);
+      allow delete: if isOwner();
     }
     
-    // Project Applications
+    // ============================================
+    // Project Applications Collection
+    // ============================================
+    // Team applications to join projects
     match /projectApplications/{applicationId} {
-      allow read: if isOwner() || isTeamMember() || (isAuthenticated() && request.auth.uid == resource.data.userId);
+      allow read: if isOwner() || isApprovedTeamMember() || (isAuthenticated() && request.auth.uid == resource.data.userId);
       allow create: if isAuthenticated();
       allow update, delete: if isOwner();
     }
     
-    // Messages (Chat)
+    // ============================================
+    // Messages Collection (Chat)
+    // ============================================
+    // Chat messages between owner and team
     match /messages/{messageId} {
-      allow read: if isOwner() || isTeamMember();
+      allow read: if isOwner() || isApprovedTeamMember();
       allow create: if isAuthenticated();
-      // Allow owners or the original sender to update any field
-      // Allow team members to mark messages as read (isRead/readBy) on messages they didn't send, without breaking when readBy is absent
       allow update: if 
         isOwner() || 
         request.auth.uid == resource.data.senderId || 
         (
-          isTeamMember() &&
+          isApprovedTeamMember() &&
           request.auth.uid != resource.data.senderId &&
-          // Only allow toggling read status without changing identity fields
           request.resource.data.message == resource.data.message &&
           request.resource.data.senderId == resource.data.senderId &&
           request.resource.data.senderRole == resource.data.senderRole &&
@@ -152,22 +193,31 @@ service cloud.firestore {
         );
       allow delete: if isOwner();
     }
-
-    // Project Ideas
+    
+    // ============================================
+    // Project Ideas Collection
+    // ============================================
+    // Team suggestions for new projects
     match /projectIdeas/{ideaId} {
-      allow read: if isOwner() || isTeamMember();
+      allow read: if isOwner() || isApprovedTeamMember();
       allow create: if isAuthenticated();
       allow update: if isOwner() || request.auth.uid == resource.data.submittedBy;
       allow delete: if isOwner();
     }
-
-    // Announcements
+    
+    // ============================================
+    // Announcements Collection
+    // ============================================
+    // Owner announcements to team
     match /announcements/{announcementId} {
-      allow read: if isOwner() || isTeamMember();
+      allow read: if isOwner() || isApprovedTeamMember();
       allow create, update, delete: if isOwner();
     }
-
-    // User Notifications
+    
+    // ============================================
+    // User Notifications Collection
+    // ============================================
+    // Personal notification tracking per user section
     match /userNotifications/{userId} {
       allow read: if isAuthenticated() && request.auth.uid == userId;
       allow create, update: if isAuthenticated() && request.auth.uid == userId;

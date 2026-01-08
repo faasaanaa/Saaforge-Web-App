@@ -14,7 +14,7 @@ import { collection, doc, getDoc, getDocs, query, setDoc, deleteDoc, Timestamp, 
 import { getAuthInstance, getDb } from '@/lib/firebase/config';
 import { User, UserRole } from '@/lib/types';
 
-const OWNER_EMAILS = ['test@saaforge.com']; // Add owner emails here
+const OWNER_EMAILS = ['saaforge@gmail.com', 'emsaadsaad580@gmail.com']; // Owner emails
 
 interface AuthContextType {
   user: User | null;
@@ -116,13 +116,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             // Check and cache approval immediately when auth state changes (user logs in)
             await checkAndCacheApproval(firebaseUser);
             
+            // Check if user email is in owner list
+            const isOwnerEmail = firebaseUser.email && OWNER_EMAILS.includes(firebaseUser.email);
+            
             // Set up real-time listener for user document to catch role changes
             const userDocRef = doc(db, 'users', firebaseUser.uid);
-            const unsubscribeUserDoc = onSnapshot(userDocRef, (userDocSnapshot) => {
+            const unsubscribeUserDoc = onSnapshot(userDocRef, async (userDocSnapshot) => {
               try {
-                // Check if user email is in owner list
-                const isOwnerEmail = firebaseUser.email && OWNER_EMAILS.includes(firebaseUser.email);
-                
                 if (userDocSnapshot.exists()) {
                   let userData = userDocSnapshot.data() as User;
                   
@@ -144,28 +144,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                   setFirebaseUser(firebaseUser);
                   setLoading(false);
                   setTeamApprovalChecked(true);
-            } else if (isOwnerEmail) {
-              // Create owner document if it doesn't exist
-              const ownerUser: User = {
-                uid: firebaseUser.uid,
-                email: firebaseUser.email!,
-                role: 'owner',
-                createdAt: Timestamp.now(),
-                updatedAt: Timestamp.now(),
-              };
-              // Owners don't need approval check
-              setIsTeamApproved(false);
-              setUser(ownerUser);
-              setFirebaseUser(firebaseUser);
-              setLoading(false);
-              setTeamApprovalChecked(true);
+                } else if (isOwnerEmail) {
+                  // No user document exists, but email is in owner list - create owner account
+                  const ownerUser: User = {
+                    uid: firebaseUser.uid,
+                    email: firebaseUser.email!,
+                    role: 'owner',
+                    createdAt: Timestamp.now(),
+                    updatedAt: Timestamp.now(),
+                  };
+                  // Save owner document to Firestore
+                  try {
+                    await setDoc(userDocRef, ownerUser);
+                  } catch (error) {
+                    console.error('Error creating owner document:', error);
+                  }
+                  // Owners don't need approval check
+                  setIsTeamApproved(false);
+                  setUser(ownerUser);
+                  setFirebaseUser(firebaseUser);
+                  setLoading(false);
+                  setTeamApprovalChecked(true);
                 } else {
-                  // User exists in Firebase but no user document in Firestore
-                  // Create a default user with team role (requires approval to access dashboard)
+                  // Non-owner user without document - create with team role (requires approval)
                   const newUser: User = {
                     uid: firebaseUser.uid,
                     email: firebaseUser.email!,
-                    role: 'team', // Default role for new users (requires approval)
+                    role: 'team',
                     createdAt: Timestamp.now(),
                     updatedAt: Timestamp.now(),
                   };

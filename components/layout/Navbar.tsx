@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/lib/contexts/AuthContext';
@@ -12,11 +12,18 @@ import { TeamProfile } from '@/lib/types';
 
 export function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const { user, firebaseUser, signOut } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isTeamApproved, setIsTeamApproved] = useState(false);
   const [checkingApproval, setCheckingApproval] = useState(false);
+  
+  // Owner email list (must match AuthContext)
+  const OWNER_EMAILS = ['saaforge@gmail.com', 'emsaadsaad580@gmail.com'];
+  
+  // Check if current user is owner by email
+  const isOwner = firebaseUser?.email && OWNER_EMAILS.includes(firebaseUser.email);
 
   const publicLinks = [
     { href: '/', label: 'Home' },
@@ -149,11 +156,15 @@ export function Navbar() {
                         <p className="text-sm font-medium text-white">{firebaseUser?.displayName || 'User'}</p>
                         <p className="text-xs text-gray-400 truncate">{user.email}</p>
                       </div>
-                      {(user.role === 'owner' || (user.role === 'team' && isTeamApproved)) && (
+                      {(isOwner || (user?.role === 'team' && isTeamApproved)) && (
                         <button
                           onClick={() => {
                             setDropdownOpen(false);
-                            window.location.href = user.role === 'owner' ? '/dashboard/owner' : '/dashboard/team';
+                            if (isOwner) {
+                              router.push('/dashboard/owner');
+                            } else {
+                              router.push('/dashboard/team');
+                            }
                           }}
                           className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white"
                         >
@@ -255,20 +266,27 @@ export function Navbar() {
                 <div className="border-t border-gray-800 pt-4 space-y-3">
                   {user ? (
                     <>
-                      {(user.role === 'owner' || (user.role === 'team' && isTeamApproved)) && (
+                      {(isOwner || (user.role === 'team' && isTeamApproved)) && (
                         <motion.div
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: publicLinks.length * 0.1 }}
                         >
-                          <Link
-                            href={user.role === 'owner' ? '/dashboard/owner' : '/dashboard/team'}
-                            onClick={() => setMobileMenuOpen(false)}
+                          <button
+                            onClick={() => {
+                              setMobileMenuOpen(false);
+                              if (isOwner) {
+                                router.push('/dashboard/owner');
+                              } else {
+                                router.push('/dashboard/team');
+                              }
+                            }}
+                            className="w-full"
                           >
                             <Button variant="outline" size="sm" className="w-full">
                               Dashboard
                             </Button>
-                          </Link>
+                          </button>
                         </motion.div>
                       )}
                       <motion.div

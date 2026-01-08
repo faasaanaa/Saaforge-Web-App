@@ -110,18 +110,12 @@ export default function OwnerProjectsPage() {
 
     setSaving(true);
     try {
-      // Generate unique clientId for client projects
-      const clientId = formData.projectType === 'client' 
-        ? `CL-${Date.now()}-${Math.random().toString(36).substring(2, 9).toUpperCase()}`
-        : undefined;
-
       const projectData: any = {
         name: formData.name,
         description: formData.description,
         techStack: formData.techStack,
         status: formData.status,
         projectType: formData.projectType,
-        clientId: editingProject?.clientId || clientId,
         isFeatured: formData.isFeatured,
         isPublished: formData.isPublished,
         assignedMembers: editingProject?.assignedMembers || [],
@@ -133,6 +127,11 @@ export default function OwnerProjectsPage() {
       if (formData.caseStudy) projectData.caseStudy = formData.caseStudy;
       if (formData.demoUrl) projectData.demoUrl = formData.demoUrl;
       if (formData.githubUrl) projectData.githubUrl = formData.githubUrl;
+      
+      // Only include clientId for client projects
+      if (formData.projectType === 'client') {
+        projectData.clientId = editingProject?.clientId || `CL-${Date.now()}-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
+      }
 
       if (editingProject) {
         await updateDocument<Project>('projects', editingProject.id, projectData);

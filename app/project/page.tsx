@@ -291,7 +291,7 @@ function ProjectDetailContent() {
           isOpen={showFeedbackModal}
           projectId={project.id}
           projectName={project.name}
-          projectType="client"
+          projectType={project.projectType}
           onClose={() => setShowFeedbackModal(false)}
         />
       )}
