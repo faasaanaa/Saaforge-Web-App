@@ -88,7 +88,7 @@ export default function TeamManagementPage() {
                       {/* Mobile view */}
                       <div
                         className="md:hidden cursor-pointer flex flex-col gap-1 flex-1"
-                        onClick={() => router.push(`/dashboard/owner/team/${member.id}`)}
+                        onClick={() => router.push(`/dashboard/owner/team-member?id=${member.id}`)}
                       >
                         <div className="flex items-start justify-between gap-1">
                           <p className="text-[11px] font-semibold text-white line-clamp-2 flex-1">
@@ -133,7 +133,7 @@ export default function TeamManagementPage() {
                       <div className="hidden md:flex md:flex-row md:items-center md:justify-between gap-2">
                         <div 
                           className="flex-grow min-w-0 cursor-pointer"
-                          onClick={() => router.push(`/dashboard/owner/team/${member.id}`)}
+                          onClick={() => router.push(`/dashboard/owner/team-member?id=${member.id}`)}
                         >
                           <div className="flex items-center gap-1.5 mb-1.5">
                             {member.profilePicture ? (

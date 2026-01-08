@@ -88,7 +88,7 @@ export function Navbar() {
   };
 
   // Show Dashboard if: owner OR (approved team member)
-  const canShowDashboard = user?.role === 'owner' || (user?.role === 'team' && isTeamApproved) || (user?.role === 'user' && isTeamApproved);
+  const canShowDashboard = user?.role === 'owner' || (user?.role === 'team' && isTeamApproved);
 
   return (
     <nav className="bg-gradient-to-r from-black via-gray-900 to-black shadow-lg shadow-gray-900/50 sticky top-0 z-30 backdrop-blur-sm bg-opacity-95 border-b border-gray-800" suppressHydrationWarning>
@@ -150,13 +150,15 @@ export function Navbar() {
                         <p className="text-xs text-gray-400 truncate">{user.email}</p>
                       </div>
                       {(user.role === 'owner' || (user.role === 'team' && isTeamApproved)) && (
-                        <Link
-                          href={user.role === 'owner' ? '/dashboard/owner' : '/dashboard/team'}
-                          onClick={() => setDropdownOpen(false)}
-                          className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white"
+                        <button
+                          onClick={() => {
+                            setDropdownOpen(false);
+                            window.location.href = user.role === 'owner' ? '/dashboard/owner' : '/dashboard/team';
+                          }}
+                          className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white"
                         >
                           Dashboard
-                        </Link>
+                        </button>
                       )}
                       <button
                         onClick={() => {

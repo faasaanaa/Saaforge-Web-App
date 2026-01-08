@@ -55,7 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                   // Override role if email is in owner list
                   if (isOwnerEmail) {
                     userData = { ...userData, role: 'owner' };
-                  } else if (userData.role === 'user' && firebaseUser.email) {
+                  } else if (userData.role === 'team' && firebaseUser.email) {
                     // Check if user has an approved teamProfile (join request approved)
                     // Check both UID and email locations
                     const uidProfileRef = doc(db, 'teamProfiles', firebaseUser.uid);
@@ -152,11 +152,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               setLoading(false);
                 } else {
                   // User exists in Firebase but no user document in Firestore
-                  // Create a default user with no role (can login but can't access dashboard)
+                  // Create a default user with team role (requires approval to access dashboard)
                   const newUser: User = {
                     uid: firebaseUser.uid,
                     email: firebaseUser.email!,
-                    role: 'user', // Default role for new/unapproved users
+                    role: 'team', // Default role for new users (requires approval)
                     createdAt: Timestamp.now(),
                     updatedAt: Timestamp.now(),
                   };
@@ -211,7 +211,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const newUser: User = {
         uid: result.user.uid,
         email: result.user.email!,
-        role: 'user', // Default role for new users - change to 'team' after approval
+        role: 'team', // Default role for new users - requires approval to access dashboard
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
       };

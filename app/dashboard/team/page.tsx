@@ -29,7 +29,7 @@ export default function TeamDashboardPage() {
   const currentProfile = profile?.[0];
 
   return (
-    <ProtectedRoute requiredRole="team">
+    <ProtectedRoute requiredRole="team" requireTeamApproval>
       <DashboardLayout>
         <div className="max-w-7xl mx-auto">
           <motion.div
@@ -130,7 +130,7 @@ export default function TeamDashboardPage() {
                           </div>
                         )}
 
-                        <Button size="sm" onClick={() => router.push(`/dashboard/team/my-projects/${project.id}`)} className="mt-auto text-[8px] px-1 py-0.5 h-auto w-full">
+                        <Button size="sm" onClick={() => router.push(`/dashboard/team/my-project?id=${project.id}`)} className="mt-auto text-[8px] px-1 py-0.5 h-auto w-full">
                           View
                         </Button>
                       </div>
@@ -143,7 +143,7 @@ export default function TeamDashboardPage() {
                         <span className="px-2 py-0.5 text-[10px] rounded-full bg-gray-800 text-gray-300 border border-gray-700 inline-block">
                           {project.status.charAt(0).toUpperCase() + project.status.slice(1)}
                         </span>
-                        <Button size="sm" onClick={() => router.push(`/dashboard/team/my-projects/${project.id}`)} className="mt-auto text-xs px-2 py-1 h-auto w-full">
+                        <Button size="sm" onClick={() => router.push(`/dashboard/team/my-project?id=${project.id}`)} className="mt-auto text-xs px-2 py-1 h-auto w-full">
                           View
                         </Button>
                       </div>

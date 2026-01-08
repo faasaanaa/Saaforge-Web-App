@@ -6,29 +6,25 @@
       "**/.*",
       "**/node_modules/**"
     ],
-    "rewrites": [
+    "cleanUrls": true,
+    "trailingSlash": false,
+    "redirects": [
       {
-        "source": "**",
-        "destination": "/index.html"
-      }
-    ],
-    "headers": [
+        "source": "/projects/:id",
+        "destination": "/project?id=:id",
+        "type": 301
+      },
       {
-        "source": "**/*.@(jpg|jpeg|gif|png|svg|webp|js|css)",
-        "headers": [
-          {
-            "key": "Cache-Control",
-            "value": "max-age=31536000"
-          }
-        ]
+        "source": "/team/:id",
+        "destination": "/team-profile?id=:id",
+        "type": 301
       }
     ]
   },
   "firestore": {
+    "database": "(default)",
+    "location": "nam5",
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
-  },
-  "storage": {
-    "rules": "storage.rules"
   }
 }

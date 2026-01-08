@@ -21,14 +21,13 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (user) {
-      // Only redirect if user has a valid role (owner or team)
+      // Only redirect owners to their dashboard
       if (user.role === 'owner') {
         router.push('/dashboard/owner');
-      } else if (user.role === 'team') {
-        router.push('/dashboard/team');
+      } else {
+        // Non-owners (team members, approved or not) go to homepage
+        router.push('/');
       }
-      // If user has no valid role (role === 'user'), stay on this page
-      // They are logged in but cannot access dashboard
     }
   }, [user, router]);
 

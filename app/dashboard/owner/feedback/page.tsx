@@ -236,20 +236,12 @@ export default function FeedbackPage() {
                 title="No feedback yet"
                 description={
                   statusFilter === 'all'
-                    ? showFeedback
-                      ? 'No feedback has been submitted yet'
-                      : 'No improvement ideas have been submitted yet'
+                    ? 'No feedback has been submitted yet'
                     : statusFilter === 'pending'
-                    ? showFeedback
-                      ? 'No pending feedback to review'
-                      : 'No pending improvement ideas to review'
+                    ? 'No pending feedback to review'
                     : statusFilter === 'approved'
-                    ? showFeedback
-                      ? 'No approved feedback'
-                      : 'No approved improvement ideas'
-                    : showFeedback
-                    ? 'No feedback found'
-                    : 'No improvement ideas found'
+                    ? 'No approved feedback'
+                    : 'No rejected feedback'
                 }
                 icon={
                   <svg className="w-16 h-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">

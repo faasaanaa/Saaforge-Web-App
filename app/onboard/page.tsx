@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Navbar } from '@/components/layout/Navbar';
@@ -16,7 +16,7 @@ import { JoinRequest, InviteCode, TeamProfile } from '@/lib/types';
 import { where, Timestamp } from 'firebase/firestore';
 import { logAudit } from '@/lib/utils/helpers';
 
-export default function OnboardPage() {
+function OnboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user } = useAuth();
@@ -398,5 +398,13 @@ export default function OnboardPage() {
 
       <Footer />
     </div>
+  );
+}
+
+export default function OnboardPage() {
+  return (
+    <Suspense fallback={<LoadingSpinner />}>
+      <OnboardContent />
+    </Suspense>
   );
 }

@@ -47,7 +47,7 @@ export default function OwnerOrdersPage() {
                   >
                     <Card 
                       className="p-2 sm:p-4 md:p-5 cursor-pointer hover:border-blue-500/50 transition-all"
-                      onClick={() => router.push(`/dashboard/owner/orders/${order.id}`)}
+                      onClick={() => router.push(`/dashboard/owner/order?id=${order.id}`)}
                     >
                       {/* Mobile view */}
                       <div className="md:hidden flex flex-col gap-1">

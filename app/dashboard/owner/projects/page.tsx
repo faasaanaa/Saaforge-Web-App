@@ -235,7 +235,7 @@ export default function OwnerProjectsPage() {
                         )}
 
                         <div className="flex gap-1 mt-auto w-full">
-                          <Button variant="outline" size="sm" onClick={() => router.push(`/dashboard/owner/projects/${project.id}`)} className="flex-1 text-[8px] px-1 py-0.5 h-auto">
+                          <Button variant="outline" size="sm" onClick={() => router.push(`/dashboard/owner/project?id=${project.id}`)} className="flex-1 text-[8px] px-1 py-0.5 h-auto">
                             View
                           </Button>
                           <Button variant="danger" size="sm" onClick={() => handleDelete(project)} className="flex-1 text-[8px] px-1 py-0.5 h-auto">

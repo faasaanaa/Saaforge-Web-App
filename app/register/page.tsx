@@ -47,7 +47,7 @@ export default function RegisterPage() {
 
     try {
       await registerWithInviteCode(formData.email, formData.password, formData.inviteCode);
-      router.push('/dashboard/team');
+      router.push('/');
     } catch (err: any) {
       setError(err.message || 'Failed to register. Please check your invite code.');
     } finally {

@@ -56,7 +56,7 @@ export default function TeamFeedbackPage() {
   };
 
   return (
-    <ProtectedRoute requiredRole="team">
+    <ProtectedRoute requiredRole="team" requireTeamApproval>
       <DashboardLayout>
         <div className="max-w-7xl mx-auto">
           <motion.div

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { Card } from '@/components/ui/Card';
@@ -16,6 +17,7 @@ import { useAuth } from '@/lib/contexts/AuthContext';
 import { getCategoryIcon, getCategoryColor } from '@/lib/utils/categoryIcons';
 
 export default function ProjectsPage() {
+  const router = useRouter();
   const { user } = useAuth();
   const [projectType, setProjectType] = useState<'all' | 'client' | 'company'>('all');
   const [feedbackProject, setFeedbackProject] = useState<Project | null>(null);
@@ -108,7 +110,7 @@ export default function ProjectsPage() {
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: index * 0.1 }}
                     viewport={{ once: true }}
-                    onClick={() => window.location.href = `/projects/${project.id}`}
+                    onClick={() => window.location.href = `/project?id=${project.id}`}
                     className="cursor-pointer"
                   >
                     <Card hover className="h-full flex flex-col">

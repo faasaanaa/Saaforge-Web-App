@@ -89,7 +89,7 @@ export default function TeamPage() {
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: index * 0.1 }}
                     viewport={{ once: true }}
-                    onClick={() => router.push(`/team/${member.id}`)}
+                    onClick={() => router.push(`/team-profile?id=${member.id}`)}
                     className="cursor-pointer"
                   >
                     <Card hover>

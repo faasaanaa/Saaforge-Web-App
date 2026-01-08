@@ -2,7 +2,7 @@ export function getCategoryIcon(category?: string): string {
   if (!category) return '📦';
   
   const categoryMap: Record<string, string> = {
-    'Web Development': '</>,',
+    'Web Development': '</>',
     'Software Automation': '⚙️',
     'Cloud Computing': '☁️',
     'Mobile Development': '📱',

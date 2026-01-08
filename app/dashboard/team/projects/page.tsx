@@ -84,7 +84,7 @@ export default function BrowseProjectsPage() {
   };
 
   return (
-    <ProtectedRoute requiredRole="team">
+    <ProtectedRoute requiredRole="team" requireTeamApproval>
       <DashboardLayout>
         <div className="max-w-7xl mx-auto">
           <motion.div
@@ -141,7 +141,7 @@ export default function BrowseProjectsPage() {
                           </div>
                         )}
 
-                        <Button size="sm" onClick={() => router.push(`/dashboard/team/projects/${project.id}`)} className="mt-auto text-[8px] px-1 py-0.5 h-auto w-full">
+                        <Button size="sm" onClick={() => router.push(`/dashboard/team/project?id=${project.id}`)} className="mt-auto text-[8px] px-1 py-0.5 h-auto w-full">
                           View
                         </Button>
                       </div>

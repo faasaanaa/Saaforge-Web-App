@@ -78,7 +78,7 @@ export default function ChatPage() {
   };
 
   return (
-    <ProtectedRoute requiredRole="team">
+    <ProtectedRoute requiredRole="team" requireTeamApproval>
       <DashboardLayout>
         <div className="w-full h-[calc(100vh-6rem)] md:h-[calc(100vh-7rem)] overflow-hidden bg-[#0b141a]">
           <motion.div

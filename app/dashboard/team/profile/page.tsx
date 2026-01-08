@@ -294,7 +294,7 @@ export default function TeamProfilePage() {
 
   if (loading || isLoadingProfile) {
     return (
-      <ProtectedRoute requiredRole="team">
+      <ProtectedRoute requiredRole="team" requireTeamApproval>
         <DashboardLayout>
           <div className="flex justify-center items-center h-96">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -305,7 +305,7 @@ export default function TeamProfilePage() {
   }
 
   return (
-    <ProtectedRoute requiredRole="team">
+    <ProtectedRoute requiredRole="team" requireTeamApproval>
       <DashboardLayout>
         <div className="max-w-4xl mx-auto">
           <motion.div

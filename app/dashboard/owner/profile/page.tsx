@@ -65,10 +65,6 @@ export default function OwnerProfilePage() {
   const [newAchievement, setNewAchievement] = useState('');
   const [newPortfolioLink, setNewPortfolioLink] = useState('');
 
-  useEffect(() => {
-    loadProfile();
-  }, [loadProfile]);
-
   const loadProfile = useCallback(async () => {
     if (!user) return;
 
@@ -107,6 +103,10 @@ export default function OwnerProfilePage() {
       setLoading(false);
     }
   }, [user, firebaseUser]);
+
+  useEffect(() => {
+    loadProfile();
+  }, [loadProfile]);
 
   const handleSave = async () => {
     if (!user) return;

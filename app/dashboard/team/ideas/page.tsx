@@ -78,7 +78,7 @@ export default function TeamIdeasPage() {
 
   if (loading) {
     return (
-      <ProtectedRoute requiredRole="team">
+      <ProtectedRoute requiredRole="team" requireTeamApproval>
         <DashboardLayout>
           <LoadingSpinner />
         </DashboardLayout>
@@ -87,7 +87,7 @@ export default function TeamIdeasPage() {
   }
 
   return (
-    <ProtectedRoute requiredRole="team">
+    <ProtectedRoute requiredRole="team" requireTeamApproval>
       <DashboardLayout>
         <div className="max-w-4xl mx-auto">
           <motion.div
