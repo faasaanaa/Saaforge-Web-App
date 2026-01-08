@@ -10,15 +10,18 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
 } from 'firebase/auth';
-import { doc, getDoc, setDoc, deleteDoc, Timestamp, onSnapshot } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, query, setDoc, deleteDoc, Timestamp, onSnapshot, where } from 'firebase/firestore';
 import { getAuthInstance, getDb } from '@/lib/firebase/config';
 import { User, UserRole } from '@/lib/types';
+
+const OWNER_EMAILS = ['test@saaforge.com']; // Add owner emails here
 
 interface AuthContextType {
   user: User | null;
   firebaseUser: FirebaseUser | null;
   loading: boolean;
   isTeamApproved: boolean;
+  teamApprovalChecked: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
@@ -32,9 +35,75 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [isTeamApproved, setIsTeamApproved] = useState(false);
+  const [teamApprovalChecked, setTeamApprovalChecked] = useState(false);
 
-  // Define owner emails
-  const OWNER_EMAILS = ['saaforge@gmail.com', 'emsaadsaad580@gmail.com'];
+  // Check approval and cache it, also migrate email profile to UID
+  const checkAndCacheApproval = async (fbUser: FirebaseUser) => {
+    try {
+      const db = getDb();
+      if (fbUser.uid) {
+        let isApproved = false;
+
+        // Check if approved by userId
+        const byUserQuery = query(
+          collection(db, 'teamProfiles'),
+          where('userId', '==', fbUser.uid)
+        );
+        const byUserSnapshot = await getDocs(byUserQuery);
+
+        if (!byUserSnapshot.empty) {
+          const profileData = byUserSnapshot.docs[0].data();
+          isApproved = profileData.isApproved === true;
+        } else if (fbUser.email) {
+          // Fallback to legacy email/UID doc IDs
+          const emailProfileRef = doc(db, 'teamProfiles', fbUser.email);
+          const emailProfileDoc = await getDoc(emailProfileRef);
+
+          const uidProfileRef = doc(db, 'teamProfiles', fbUser.uid);
+          const uidProfileDoc = await getDoc(uidProfileRef);
+
+          if (emailProfileDoc.exists() && emailProfileDoc.data().isApproved === true) {
+            isApproved = true;
+          } else if (uidProfileDoc.exists() && uidProfileDoc.data().isApproved === true) {
+            isApproved = true;
+          }
+
+          // Migrate email profile to UID if needed
+          if (emailProfileDoc.exists() && !uidProfileDoc.exists()) {
+            try {
+              const profileData = emailProfileDoc.data();
+              await setDoc(uidProfileRef, {
+                ...profileData,
+                userId: fbUser.uid,
+                updatedAt: Timestamp.now(),
+              });
+              console.log('Migrated email-based profile to UID');
+              // Delete email profile after migration
+              await deleteDoc(emailProfileRef);
+              console.log('Deleted email-based profile');
+            } catch (error) {
+              console.error('Error migrating profile:', error);
+            }
+          } else if (emailProfileDoc.exists() && uidProfileDoc.exists()) {
+            // Both exist, delete email profile
+            try {
+              await deleteDoc(emailProfileRef);
+              console.log('Deleted duplicate email-based profile');
+            } catch (error) {
+              console.error('Error deleting email profile:', error);
+            }
+          }
+        }
+
+        // Cache approval in localStorage
+        localStorage.setItem(`approval_${fbUser.uid}`, isApproved ? 'true' : 'false');
+        setIsTeamApproved(isApproved);
+      }
+    } catch (error) {
+      console.error('Error checking and caching approval:', error);
+      setIsTeamApproved(false);
+    }
+  };
 
   useEffect(() => {
     try {
@@ -44,9 +113,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
         try {
           if (firebaseUser) {
+            // Check and cache approval immediately when auth state changes (user logs in)
+            await checkAndCacheApproval(firebaseUser);
+            
             // Set up real-time listener for user document to catch role changes
             const userDocRef = doc(db, 'users', firebaseUser.uid);
-            const unsubscribeUserDoc = onSnapshot(userDocRef, async (userDocSnapshot) => {
+            const unsubscribeUserDoc = onSnapshot(userDocRef, (userDocSnapshot) => {
               try {
                 // Check if user email is in owner list
                 const isOwnerEmail = firebaseUser.email && OWNER_EMAILS.includes(firebaseUser.email);
@@ -58,33 +130,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                   if (isOwnerEmail) {
                     userData = { ...userData, role: 'owner' };
                     setIsTeamApproved(false); // Owners don't need approval
-                  } else if (userData.role === 'team' && firebaseUser.email) {
-                    // Check if user has an approved teamProfile (join request approved)
-                    // Check both UID and email locations
-                    const uidProfileRef = doc(db, 'teamProfiles', firebaseUser.uid);
-                    const uidProfileDoc = await getDoc(uidProfileRef);
-                    
-                    const emailProfileRef = doc(db, 'teamProfiles', firebaseUser.email);
-                    const emailProfileDoc = await getDoc(emailProfileRef);
-                    
-                    // Prefer email-based profile if it exists and is approved (from join request)
-                    // Otherwise check UID-based profile
-                    let isApproved = false;
-                    if (emailProfileDoc.exists() && emailProfileDoc.data().isApproved === true) {
-                      isApproved = true;
-                    } else if (uidProfileDoc.exists() && uidProfileDoc.data().isApproved === true) {
-                      isApproved = true;
-                    }
-                    
-                    // Set approval state
-                    setIsTeamApproved(isApproved);
-                    
-                    // If any approved teamProfile exists, upgrade to team role
-                    if (isApproved) {
-                      userData = { ...userData, role: 'team' };
-                      // Update user document with new role
-                      await setDoc(doc(db, 'users', firebaseUser.uid), userData);
-                    }
+                  } else if (userData.role === 'team') {
+                    // For team members, approval is already cached by checkAndCacheApproval
+                    // Read the cached value to update UI state
+                    const cachedApproval = localStorage.getItem(`approval_${firebaseUser.uid}`);
+                    setIsTeamApproved(cachedApproval === 'true');
                   } else {
                     // Not a team member, no approval needed
                     setIsTeamApproved(false);
@@ -93,59 +143,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                   setUser(userData);
                   setFirebaseUser(firebaseUser);
                   setLoading(false);
-              
-              // Legacy migration: Clean up old email-based teamProfiles (from before UID-based fix)
-              // This runs once for existing users, then can be removed in future
-              if (firebaseUser.email && userData.role === 'team') {
-                try {
-                  const emailProfileRef = doc(db, 'teamProfiles', firebaseUser.email);
-                  const emailProfileDoc = await getDoc(emailProfileRef);
-                  
-                  if (emailProfileDoc.exists()) {
-                    const uidProfileRef = doc(db, 'teamProfiles', firebaseUser.uid);
-                    const uidProfileDoc = await getDoc(uidProfileRef);
-                    
-                    if (!uidProfileDoc.exists()) {
-                      // Migrate if UID profile doesn't exist
-                      console.log('Migrating old email-based profile to UID:', firebaseUser.email);
-                      const profileData = emailProfileDoc.data();
-                      await setDoc(uidProfileRef, {
-                        ...profileData,
-                        userId: firebaseUser.uid,
-                        profilePicture: profileData.profilePicture || firebaseUser.photoURL || '',
-                        updatedAt: Timestamp.now(),
-                      });
-                    }
-                    // Delete email-based profile in both cases
-                    await deleteDoc(emailProfileRef);
-                    console.log('Deleted old email-based profile');
-                  }
-                } catch (error: any) {
-                  // Ignore permission errors - profile will be cleaned up later
-                  if (!error?.code?.includes('permission')) {
-                    console.error('Error during migration:', error);
-                  }
-                }
-                
-                // Update Google profile picture if not set
-                if (firebaseUser.photoURL) {
-                  try {
-                    const uidProfileRef = doc(db, 'teamProfiles', firebaseUser.uid);
-                    const uidProfileDoc = await getDoc(uidProfileRef);
-                    if (uidProfileDoc.exists() && !uidProfileDoc.data().profilePicture) {
-                      await setDoc(uidProfileRef, {
-                        profilePicture: firebaseUser.photoURL,
-                        updatedAt: Timestamp.now(),
-                      }, { merge: true });
-                    }
-                  } catch (error: any) {
-                    // Ignore permission errors
-                    if (!error?.code?.includes('permission')) {
-                      console.error('Error updating profile picture:', error);
-                    }
-                  }
-                }
-              }
+                  setTeamApprovalChecked(true);
             } else if (isOwnerEmail) {
               // Create owner document if it doesn't exist
               const ownerUser: User = {
@@ -155,10 +153,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 createdAt: Timestamp.now(),
                 updatedAt: Timestamp.now(),
               };
-              await setDoc(doc(db, 'users', firebaseUser.uid), ownerUser);
+              // Owners don't need approval check
+              setIsTeamApproved(false);
               setUser(ownerUser);
               setFirebaseUser(firebaseUser);
               setLoading(false);
+              setTeamApprovalChecked(true);
                 } else {
                   // User exists in Firebase but no user document in Firestore
                   // Create a default user with team role (requires approval to access dashboard)
@@ -169,10 +169,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     createdAt: Timestamp.now(),
                     updatedAt: Timestamp.now(),
                   };
-                  await setDoc(doc(db, 'users', firebaseUser.uid), newUser);
                   setUser(newUser);
                   setFirebaseUser(firebaseUser);
                   setLoading(false);
+                  setTeamApprovalChecked(true);
                 }
               } catch (error) {
                 console.error('Error in user document listener:', error);
@@ -186,6 +186,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setUser(null);
             setFirebaseUser(null);
             setIsTeamApproved(false);
+            setTeamApprovalChecked(false);
             setLoading(false);
           }
         } catch (error) {
@@ -203,7 +204,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     const auth = getAuthInstance();
-    await signInWithEmailAndPassword(auth, email, password);
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    
+    // Check and cache approval after successful login
+    if (userCredential.user) {
+      await checkAndCacheApproval(userCredential.user);
+    }
   };
 
   const signInWithGoogle = async () => {
@@ -234,7 +240,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         userId: result.user.uid,
         name: result.user.displayName || '',
         email: result.user.email!,
-        profilePicture: result.user.photoURL || undefined, // Google profile picture
+        profilePicture: result.user.photoURL || undefined,
         role: '',
         bio: '',
         skills: [],
@@ -253,15 +259,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           socialLinks: false,
         },
         isPubliclyVisible: false,
-        isApproved: false, // Requires approval for Google sign-ins
+        isApproved: false,
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
       });
     }
+
+    // Check and cache approval after successful login
+    await checkAndCacheApproval(result.user);
   };
 
   const signOut = async () => {
     const auth = getAuthInstance();
+    // Clear approval cache on logout
+    if (auth.currentUser?.uid) {
+      localStorage.removeItem(`approval_${auth.currentUser.uid}`);
+    }
+    localStorage.removeItem('loginTime');
     await firebaseSignOut(auth);
   };
 
@@ -350,7 +364,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, firebaseUser, loading, isTeamApproved, signIn, signInWithGoogle, signOut, registerWithInviteCode }}>
+    <AuthContext.Provider value={{ user, firebaseUser, loading, isTeamApproved, teamApprovalChecked, signIn, signInWithGoogle, signOut, registerWithInviteCode }}>
       {children}
     </AuthContext.Provider>
   );
