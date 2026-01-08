@@ -1,0 +1,108 @@
+@import "tailwindcss";
+
+:root {
+  /* Premium Dark Theme - matching black & silver icon */
+  --background: #0a0a0a;
+  --foreground: #e8e8e8;
+  --primary: #1a1a1a;
+  --secondary: #2a2a2a;
+  --accent: #c0c0c0;
+  --accent-dark: #808080;
+  --border: #333333;
+  --card: #1a1a1a;
+  --card-foreground: #f5f5f5;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+}
+
+/* Premium gradient overlays */
+.premium-gradient {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%);
+}
+
+.premium-card {
+  background: rgba(26, 26, 26, 0.95);
+  border: 1px solid rgba(192, 192, 192, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.premium-text-gradient {
+  background: linear-gradient(135deg, #ffffff 0%, #c0c0c0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.premium-border {
+  border-color: rgba(192, 192, 192, 0.2);
+}
+
+/* Metallic accents */
+.metallic-silver {
+  background: linear-gradient(145deg, #c0c0c0, #e8e8e8, #a8a8a8);
+}
+
+/* Glow effects for premium feel */
+.premium-glow {
+  box-shadow: 0 0 20px rgba(192, 192, 192, 0.1);
+}
+
+.premium-glow-hover:hover {
+  box-shadow: 0 0 30px rgba(192, 192, 192, 0.2);
+}
+
+/* Crystal Glass Morphism */
+.crystal-glass {
+  background: rgba(30, 25, 45, 0.4);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  backdrop-filter: blur(20px);
+  box-shadow: 
+    0 0 30px rgba(139, 92, 246, 0.2),
+    inset 0 1px 2px rgba(255, 255, 255, 0.1),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.crystal-glass-hover:hover {
+  background: rgba(30, 25, 45, 0.5);
+  border-color: rgba(139, 92, 246, 0.5);
+  box-shadow: 
+    0 0 40px rgba(139, 92, 246, 0.3),
+    inset 0 1px 2px rgba(255, 255, 255, 0.15),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Dark Crystalline Purple for links */
+.crystal-purple {
+  color: #a78bfa;
+}
+
+.crystal-purple:hover {
+  color: #c4b5fd;
+  text-shadow: 0 0 10px rgba(139, 92, 246, 0.4);
+}
+
+/* Hide scrollbars on desktop/laptop */
+@media (min-width: 768px) {
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  ::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Hide scrollbar for IE, Edge and Firefox */
+  * {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+}

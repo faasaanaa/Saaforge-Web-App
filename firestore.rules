@@ -1,0 +1,177 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner() {
+      // Only these specific email addresses have owner access
+      return isAuthenticated() && 
+             (request.auth.token.email == 'saaforge@gmail.com' ||
+              request.auth.token.email == 'emsaadsaad580@gmail.com');
+    }
+    
+    function isTeamMember() {
+      return isAuthenticated() && 
+             ((exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+               get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'team') ||
+              (exists(/databases/$(database)/documents/teamProfiles/$(request.auth.uid)) &&
+               get(/databases/$(database)/documents/teamProfiles/$(request.auth.uid)).data.isApproved == true) ||
+              (exists(/databases/$(database)/documents/teamProfiles/$(request.auth.token.email)) &&
+               get(/databases/$(database)/documents/teamProfiles/$(request.auth.token.email)).data.isApproved == true));
+    }
+    
+    function isSelfOrOwner(userId) {
+      return isAuthenticated() && (request.auth.uid == userId || isOwner());
+    }
+    
+    function isApprovedPublicProfile(profileDoc) {
+      return profileDoc.data.isPubliclyVisible == true && 
+             profileDoc.data.isApproved == true;
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+      allow update: if isSelfOrOwner(userId);
+      allow delete: if isOwner();
+    }
+    
+    // Team Profiles - Support both UID and email-based access
+    match /teamProfiles/{profileId} {
+      allow read: if isApprovedPublicProfile(resource) || 
+                     (isAuthenticated() && request.auth.uid == profileId) ||
+                     (isAuthenticated() && request.auth.token.email == profileId) ||
+                     (isAuthenticated() && resource.data.userId == request.auth.uid) ||
+                     isOwner() ||
+                     isTeamMember();
+      allow create: if isOwner() || (isAuthenticated() && request.auth.uid == profileId);
+      allow update: if isSelfOrOwner(profileId) || (isAuthenticated() && request.auth.token.email == profileId) || (isAuthenticated() && resource.data.userId == request.auth.uid);
+      allow delete: if isOwner() || 
+                       (isAuthenticated() && request.auth.uid == profileId) ||
+                       (isAuthenticated() && request.auth.token.email == profileId) ||
+                       (isAuthenticated() && resource.data.userId == request.auth.uid);
+    }
+
+    // Owner Profiles
+    match /ownerProfiles/{profileId} {
+      allow read: if resource.data.isPubliclyVisible == true || 
+                     isAuthenticated();
+      allow create, update: if isOwner() && request.auth.uid == profileId;
+      allow delete: if isOwner();
+    }
+    
+    // Join Requests
+    match /joinRequests/{requestId} {
+      allow read: if isOwner() || (isAuthenticated() && request.auth.uid == resource.data.userId);
+      allow create: if true; // Anyone can submit
+      allow update: if isOwner();
+      allow delete: if isOwner();
+    }
+    
+    // Invite Codes
+    match /inviteCodes/{codeId} {
+      allow read: if true; // Need to verify codes during registration
+      allow create: if isOwner();
+      allow update: if isOwner() || (isAuthenticated() && resource.data.email == request.auth.token.email);
+      allow delete: if isOwner();
+    }
+    
+    // Projects
+    match /projects/{projectId} {
+      allow read: if resource.data.isPublished == true || isOwner() || isTeamMember();
+      allow create: if isOwner();
+      allow update: if isOwner();
+      allow delete: if isOwner();
+    }
+    
+    // Orders
+    match /orders/{orderId} {
+      allow read: if isOwner();
+      allow create: if true; // Anyone can submit
+      allow update: if isOwner();
+      allow delete: if isOwner();
+    }
+    
+    // Site Content
+    match /siteContent/{contentId} {
+      allow read: if true; // Public read
+      allow write: if isOwner();
+    }
+    
+    // Audit Logs
+    match /auditLogs/{logId} {
+      allow read: if isOwner();
+      allow create: if isAuthenticated();
+      allow update, delete: if false; // Audit logs are immutable
+    }
+    
+    // Project Feedback
+    match /projectFeedback/{feedbackId} {
+      allow read: if isOwner() || isTeamMember() || resource.data.isPublic == true;
+      allow create: if isAuthenticated();
+      allow update: if isOwner();
+      allow delete: if isOwner();
+    }
+    
+    // Tasks
+    match /tasks/{taskId} {
+      allow read: if isOwner() || isTeamMember();
+      allow create, update, delete: if isOwner();
+    }
+    
+    // Project Applications
+    match /projectApplications/{applicationId} {
+      allow read: if isOwner() || isTeamMember() || (isAuthenticated() && request.auth.uid == resource.data.userId);
+      allow create: if isAuthenticated();
+      allow update, delete: if isOwner();
+    }
+    
+    // Messages (Chat)
+    match /messages/{messageId} {
+      allow read: if isOwner() || isTeamMember();
+      allow create: if isAuthenticated();
+      // Allow owners or the original sender to update any field
+      // Allow team members to mark messages as read (isRead/readBy) on messages they didn't send, without breaking when readBy is absent
+      allow update: if 
+        isOwner() || 
+        request.auth.uid == resource.data.senderId || 
+        (
+          isTeamMember() &&
+          request.auth.uid != resource.data.senderId &&
+          // Only allow toggling read status without changing identity fields
+          request.resource.data.message == resource.data.message &&
+          request.resource.data.senderId == resource.data.senderId &&
+          request.resource.data.senderRole == resource.data.senderRole &&
+          request.resource.data.createdAt == resource.data.createdAt &&
+          (request.resource.data.isRead == true || request.resource.data.isRead == resource.data.isRead)
+        );
+      allow delete: if isOwner();
+    }
+
+    // Project Ideas
+    match /projectIdeas/{ideaId} {
+      allow read: if isOwner() || isTeamMember();
+      allow create: if isAuthenticated();
+      allow update: if isOwner() || request.auth.uid == resource.data.submittedBy;
+      allow delete: if isOwner();
+    }
+
+    // Announcements
+    match /announcements/{announcementId} {
+      allow read: if isOwner() || isTeamMember();
+      allow create, update, delete: if isOwner();
+    }
+
+    // User Notifications
+    match /userNotifications/{userId} {
+      allow read: if isAuthenticated() && request.auth.uid == userId;
+      allow create, update: if isAuthenticated() && request.auth.uid == userId;
+      allow delete: if isAuthenticated() && request.auth.uid == userId;
+    }
+  }
+}
