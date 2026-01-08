@@ -5,21 +5,55 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { useAuth } from '@/lib/contexts/AuthContext';
-import { useDocument } from '@/lib/hooks/useFirestore';
+import { useDocument, useCollection, updateDocument } from '@/lib/hooks/useFirestore';
 import { LoadingSpinner } from '@/components/ui/Loading';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { Project } from '@/lib/types';
+import { Button } from '@/components/ui/Button';
+import { Project, TeamProfile } from '@/lib/types';
+import { motion } from 'framer-motion';
 
 function ProjectDetailContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { user } = useAuth();
   const projectId = searchParams?.get('id');
+  const [assignedMembers, setAssignedMembers] = useState<string[]>([]);
+  const [savingAssignments, setSavingAssignments] = useState(false);
 
   const { data: project, loading, error } = useDocument<Project>(
     'projects',
     projectId
   );
+
+  const { data: allTeamMembers } = useCollection<TeamProfile>('teamProfiles');
+
+  useEffect(() => {
+    if (project?.assignedMembers) {
+      setAssignedMembers(project.assignedMembers);
+    }
+  }, [project]);
+
+  const handleToggleMember = (memberId: string) => {
+    setAssignedMembers((prev) =>
+      prev.includes(memberId) ? prev.filter((id) => id !== memberId) : [...prev, memberId]
+    );
+  };
+
+  const handleSaveAssignments = async () => {
+    if (!projectId) return;
+    setSavingAssignments(true);
+    try {
+      await updateDocument<Project>('projects', projectId, {
+        assignedMembers,
+      });
+      alert('Team assignments updated successfully!');
+    } catch (error) {
+      console.error('Error updating assignments:', error);
+      alert('Failed to update assignments. Please try again.');
+    } finally {
+      setSavingAssignments(false);
+    }
+  };
 
   if (!projectId) {
     return (
@@ -45,8 +79,15 @@ function ProjectDetailContent() {
     );
   }
 
+  const approvedMembers = allTeamMembers?.filter(m => m.isApproved && !m.id.includes('@')) || [];
+
   return (
-    <div className="max-w-4xl mx-auto">
+    <motion.div 
+      className="max-w-4xl mx-auto"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
       <button
         onClick={() => router.back()}
         className="mb-6 px-4 py-2 text-sm font-medium text-gray-300 hover:text-white transition-colors"
@@ -84,9 +125,56 @@ function ProjectDetailContent() {
             </div>
           </div>
         )}
-
       </div>
-    </div>
+
+      {/* Assign Team Members */}
+      <div className="bg-gray-900 rounded-lg border border-gray-800 p-6">
+        <h2 className="text-2xl font-bold text-white mb-4">Assign Team Members</h2>
+        
+        {approvedMembers.length === 0 ? (
+          <p className="text-gray-400">No approved team members available to assign.</p>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
+              {approvedMembers.map((member) => (
+                <motion.label
+                  key={member.id}
+                  className="flex items-center gap-3 p-3 border border-gray-700 rounded-lg hover:bg-gray-800 cursor-pointer transition-colors"
+                  whileHover={{ scale: 1.02 }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={assignedMembers.includes(member.id)}
+                    onChange={() => handleToggleMember(member.id)}
+                    className="w-4 h-4 rounded"
+                  />
+                  <div className="flex-1">
+                    <p className="font-medium text-white">{member.name || 'Unnamed'}</p>
+                    {member.role && <p className="text-xs text-gray-400">{member.role}</p>}
+                  </div>
+                  {assignedMembers.includes(member.id) && (
+                    <span className="text-sm text-green-400 font-semibold">✓ Assigned</span>
+                  )}
+                </motion.label>
+              ))}
+            </div>
+
+            <div className="flex gap-3">
+              <Button
+                onClick={handleSaveAssignments}
+                isLoading={savingAssignments}
+                className="flex-1"
+              >
+                Save Assignments
+              </Button>
+              <Button variant="outline" onClick={() => router.back()}>
+                Cancel
+              </Button>
+            </div>
+          </>
+        )}
+      </div>
+    </motion.div>
   );
 }
 

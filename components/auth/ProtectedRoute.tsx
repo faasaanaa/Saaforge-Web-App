@@ -13,43 +13,14 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children, requiredRole, requireTeamApproval }: ProtectedRouteProps) {
-  const { user, loading } = useAuth();
+  const { user, loading, isTeamApproved } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [hasRedirected, setHasRedirected] = useState(false);
-  const [approvalChecked, setApprovalChecked] = useState(false);
-  const [isTeamApproved, setIsTeamApproved] = useState<boolean | null>(null);
 
   useEffect(() => {
-    const checkApproval = async () => {
-      if (
-        user &&
-        requireTeamApproval &&
-        requiredRole === 'team' &&
-        user?.role === 'team'
-      ) {
-        try {
-          const { doc, getDoc } = await import('firebase/firestore');
-          const { getDb } = await import('@/lib/firebase/config');
-          const db = getDb();
-          const profileSnap = await getDoc(doc(db, 'teamProfiles', user.uid));
-          const approved = profileSnap.exists() && profileSnap.data()?.isApproved === true;
-          setIsTeamApproved(approved);
-        } catch (e) {
-          setIsTeamApproved(false);
-        } finally {
-          setApprovalChecked(true);
-        }
-      } else {
-        setApprovalChecked(true);
-      }
-    };
-    checkApproval();
-  }, [user?.uid, user?.role, requireTeamApproval, requiredRole]);
-
-  useEffect(() => {
-    if (!loading && approvalChecked) {
+    if (!loading) {
       let authorized = false;
       let shouldRedirect = false;
       let redirectPath = '';
@@ -94,10 +65,10 @@ export function ProtectedRoute({ children, requiredRole, requireTeamApproval }: 
 
       setIsAuthorized(authorized);
     }
-  }, [user, loading, requiredRole, requireTeamApproval, isTeamApproved, approvalChecked, router, pathname, hasRedirected]);
+  }, [user, loading, requiredRole, requireTeamApproval, isTeamApproved, router, pathname, hasRedirected]);
 
   // Still loading auth - show spinner
-  if (loading || (requireTeamApproval && requiredRole === 'team' && !approvalChecked)) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <LoadingSpinner size="lg" />

@@ -19,9 +19,29 @@ export default function OwnerDashboardPage() {
     where('status', '==', 'new'),
   ]);
 
-  const { data: teamMembers } = useCollection<TeamProfile>('teamProfiles');
+  const { data: allTeamMembers } = useCollection<TeamProfile>('teamProfiles');
   
   const { data: projects } = useCollection<Project>('projects');
+  // Filter out email-based duplicates and incomplete profiles (same as team management page)
+  const teamMembers = allTeamMembers?.filter((member) => {
+    // Filter out email-based IDs (old duplicates from before UID-based fix)
+    if (member.id.includes('@')) {
+      return false;
+    }
+    
+    // Show if any of these conditions are true:
+    // 1. Profile is approved (owner approved them)
+    // 2. Name is filled AND (has bio OR has skills OR has interests)
+    // 3. Has role filled (from join request)
+    return (
+      member.isApproved ||
+      (member.name && member.name.trim() !== '' && 
+        (member.bio || (member.skills && member.skills.length > 0) || (member.interests && member.interests.length > 0))
+      ) ||
+      (member.role && member.role.trim() !== '')
+    );
+  });
+
 
   const stats = [
     {

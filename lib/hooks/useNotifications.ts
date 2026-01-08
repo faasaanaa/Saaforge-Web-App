@@ -103,6 +103,7 @@ export function useNotifications() {
     if (joinRequests) {
       const newCount = joinRequests.filter(req => {
         const lastViewedTime = lastViewed.requests;
+        if (!req.createdAt) return true; // Show if no timestamp
         return !lastViewedTime || req.createdAt.toMillis() > lastViewedTime.toMillis();
       }).length;
       counts.requests = newCount;
@@ -112,6 +113,7 @@ export function useNotifications() {
     if (projectIdeas) {
       const newCount = projectIdeas.filter(idea => {
         const lastViewedTime = lastViewed.ideas;
+        if (!idea.createdAt) return true; // Show if no timestamp
         return !lastViewedTime || idea.createdAt.toMillis() > lastViewedTime.toMillis();
       }).length;
       counts.ideas = newCount;
@@ -121,6 +123,7 @@ export function useNotifications() {
     if (orders) {
       const newCount = orders.filter(order => {
         const lastViewedTime = lastViewed.orders;
+        if (!order.createdAt) return true; // Show if no timestamp
         return !lastViewedTime || order.createdAt.toMillis() > lastViewedTime.toMillis();
       }).length;
       counts.orders = newCount;
@@ -130,6 +133,7 @@ export function useNotifications() {
     if (feedback) {
       const newCount = feedback.filter(fb => {
         const lastViewedTime = lastViewed.feedback;
+        if (!fb.createdAt) return true; // Show if no timestamp
         return !lastViewedTime || fb.createdAt.toMillis() > lastViewedTime.toMillis();
       }).length;
       counts.feedback = newCount;
@@ -140,6 +144,7 @@ export function useNotifications() {
       const myTasks = tasks.filter(task => task.assignedTo === user.uid);
       const newCount = myTasks.filter(task => {
         const lastViewedTime = lastViewed.tasks;
+        if (!task.createdAt) return true; // Show if no timestamp
         return !lastViewedTime || task.createdAt.toMillis() > lastViewedTime.toMillis();
       }).length;
       counts.tasks = newCount;
@@ -152,6 +157,7 @@ export function useNotifications() {
       );
       const newCount = myProjects.filter(project => {
         const lastViewedTime = lastViewed.projects;
+        if (!project.createdAt) return true; // Show if no timestamp
         return !lastViewedTime || project.createdAt.toMillis() > lastViewedTime.toMillis();
       }).length;
       counts.projects = newCount;
@@ -161,6 +167,7 @@ export function useNotifications() {
     if (teamProfiles && user.role === 'owner') {
       const newCount = teamProfiles.filter(profile => {
         const lastViewedTime = lastViewed.team;
+        if (!profile.createdAt) return true; // Show if no timestamp
         return !lastViewedTime || profile.createdAt.toMillis() > lastViewedTime.toMillis();
       }).length;
       counts.team = newCount;
@@ -170,6 +177,7 @@ export function useNotifications() {
     if (content && user.role === 'owner') {
       const newCount = content.filter(item => {
         const lastViewedTime = lastViewed.content;
+        if (!item.updatedAt) return true; // Show if no timestamp
         return !lastViewedTime || item.updatedAt.toMillis() > lastViewedTime.toMillis();
       }).length;
       counts.content = newCount;
@@ -179,6 +187,7 @@ export function useNotifications() {
     if (auditLogs && user.role === 'owner') {
       const newCount = auditLogs.filter(log => {
         const lastViewedTime = lastViewed.audit;
+        if (!log.timestamp) return true; // Show if no timestamp
         return !lastViewedTime || log.timestamp.toMillis() > lastViewedTime.toMillis();
       }).length;
       counts.audit = newCount;

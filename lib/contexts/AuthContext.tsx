@@ -18,6 +18,7 @@ interface AuthContextType {
   user: User | null;
   firebaseUser: FirebaseUser | null;
   loading: boolean;
+  isTeamApproved: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
@@ -30,6 +31,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isTeamApproved, setIsTeamApproved] = useState(false);
 
   // Define owner emails
   const OWNER_EMAILS = ['saaforge@gmail.com', 'emsaadsaad580@gmail.com'];
@@ -55,6 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                   // Override role if email is in owner list
                   if (isOwnerEmail) {
                     userData = { ...userData, role: 'owner' };
+                    setIsTeamApproved(false); // Owners don't need approval
                   } else if (userData.role === 'team' && firebaseUser.email) {
                     // Check if user has an approved teamProfile (join request approved)
                     // Check both UID and email locations
@@ -73,12 +76,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                       isApproved = true;
                     }
                     
+                    // Set approval state
+                    setIsTeamApproved(isApproved);
+                    
                     // If any approved teamProfile exists, upgrade to team role
                     if (isApproved) {
                       userData = { ...userData, role: 'team' };
                       // Update user document with new role
                       await setDoc(doc(db, 'users', firebaseUser.uid), userData);
                     }
+                  } else {
+                    // Not a team member, no approval needed
+                    setIsTeamApproved(false);
                   }
                   
                   setUser(userData);
@@ -176,6 +185,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           } else {
             setUser(null);
             setFirebaseUser(null);
+            setIsTeamApproved(false);
             setLoading(false);
           }
         } catch (error) {
@@ -340,7 +350,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, firebaseUser, loading, signIn, signInWithGoogle, signOut, registerWithInviteCode }}>
+    <AuthContext.Provider value={{ user, firebaseUser, loading, isTeamApproved, signIn, signInWithGoogle, signOut, registerWithInviteCode }}>
       {children}
     </AuthContext.Provider>
   );

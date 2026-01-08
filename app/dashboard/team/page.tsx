@@ -10,7 +10,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { LoadingSpinner } from '@/components/ui/Loading';
 import { useCollection } from '@/lib/hooks/useFirestore';
 import { useAuth } from '@/lib/contexts/AuthContext';
-import { TeamProfile, Project } from '@/lib/types';
+import { TeamProfile, Project, Task } from '@/lib/types';
 import { where } from 'firebase/firestore';
 
 export default function TeamDashboardPage() {
@@ -25,6 +25,14 @@ export default function TeamDashboardPage() {
     'projects',
     user ? [where('assignedMembers', 'array-contains', user.uid)] : []
   );
+
+  const { data: tasks } = useCollection<Task>(
+    'tasks',
+    user ? [where('assignedTo', '==', user.uid)] : []
+  );
+
+  const pendingTasks = tasks?.filter((t) => t.status !== 'completed') || [];
+  const standalonePendingTasks = pendingTasks.filter((t) => !t.projectId);
 
   const currentProfile = profile?.[0];
 
@@ -59,11 +67,11 @@ export default function TeamDashboardPage() {
               <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-6 mb-6 md:mb-8">
               <Card>
                 <div className="text-center">
-                  <div className="text-2xl md:text-4xl mb-1 md:mb-2">📁</div>
+                  <div className="text-2xl md:text-4xl mb-1 md:mb-2">⏳</div>
                   <p className="text-xl md:text-3xl font-bold text-white">
-                    {projects?.length || 0}
+                    {pendingTasks.length}
                   </p>
-                  <p className="text-xs md:text-sm text-gray-400">Assigned Projects</p>
+                  <p className="text-xs md:text-sm text-gray-400">Pending Tasks</p>
                 </div>
               </Card>
 
@@ -90,15 +98,19 @@ export default function TeamDashboardPage() {
               </Card>
             </div>
 
-            {/* My Projects */}
+            {/* My Tasks */}
             <Card className="mb-6 md:mb-8">
-              <h2 className="text-lg md:text-2xl font-bold text-white mb-3 md:mb-4">My Projects</h2>
+              <h2 className="text-lg md:text-2xl font-bold text-white mb-3 md:mb-4">My Tasks</h2>
               {projectsLoading ? (
                 <LoadingSpinner />
-              ) : projects && projects.length > 0 ? (
-                <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 md:gap-3">
-                  {projects.map((project) => (
-                    <Card key={project.id} className="p-2 sm:p-4 flex flex-col h-full md:flex-col md:gap-3">
+              ) : (projects && projects.length > 0) || standalonePendingTasks.length > 0 ? (
+                <>
+                  {projects && projects.length > 0 && (
+                    <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 md:gap-3 mb-4">
+                      {projects.map((project) => {
+                        const projectTasks = tasks?.filter((t) => t.projectId === project.id && t.status !== 'completed') || [];
+                        return (
+                        <Card key={project.id} className="p-2 sm:p-4 flex flex-col h-full md:flex-col md:gap-3">
                       <div className="md:hidden flex flex-col gap-1 flex-1 w-full">
                         <div className="flex items-start justify-between gap-1">
                           <h3 className="text-[11px] font-semibold text-white line-clamp-2 flex-1">{project.name}</h3>
@@ -130,8 +142,22 @@ export default function TeamDashboardPage() {
                           </div>
                         )}
 
-                        <Button size="sm" onClick={() => router.push(`/dashboard/team/my-project?id=${project.id}`)} className="mt-auto text-[8px] px-1 py-0.5 h-auto w-full">
-                          View
+                        {projectTasks.length > 0 && (
+                          <div className="mt-2 space-y-1">
+                            {projectTasks.slice(0, 2).map((task) => (
+                              <div key={task.id} className="flex items-center justify-between text-[7px] bg-gray-800/70 px-2 py-1 rounded border border-gray-700/50">
+                                <span className="text-gray-200 line-clamp-1">{task.title}</span>
+                                <span className="text-gray-400 capitalize">{task.status.replace('-', ' ')}</span>
+                              </div>
+                            ))}
+                            {projectTasks.length > 2 && (
+                              <span className="text-[7px] text-gray-400">+{projectTasks.length - 2} more tasks</span>
+                            )}
+                          </div>
+                        )}
+
+                        <Button size="sm" onClick={() => router.push(`/dashboard/team/tasks`)} className="mt-auto text-[8px] px-1 py-0.5 h-auto w-full">
+                          Go to My Tasks
                         </Button>
                       </div>
 
@@ -143,17 +169,56 @@ export default function TeamDashboardPage() {
                         <span className="px-2 py-0.5 text-[10px] rounded-full bg-gray-800 text-gray-300 border border-gray-700 inline-block">
                           {project.status.charAt(0).toUpperCase() + project.status.slice(1)}
                         </span>
-                        <Button size="sm" onClick={() => router.push(`/dashboard/team/my-project?id=${project.id}`)} className="mt-auto text-xs px-2 py-1 h-auto w-full">
-                          View
+                        {projectTasks.length > 0 && (
+                          <div className="space-y-1 text-[11px] text-gray-300">
+                            {projectTasks.slice(0, 3).map((task) => (
+                              <div key={task.id} className="flex items-center justify-between bg-gray-800/70 px-2 py-1 rounded border border-gray-700/50">
+                                <span className="line-clamp-1">{task.title}</span>
+                                <span className="text-gray-400 capitalize text-[10px]">{task.status.replace('-', ' ')}</span>
+                              </div>
+                            ))}
+                            {projectTasks.length > 3 && (
+                              <span className="text-[10px] text-gray-400">+{projectTasks.length - 3} more tasks</span>
+                            )}
+                          </div>
+                        )}
+                        <Button size="sm" onClick={() => router.push(`/dashboard/team/tasks`)} className="mt-auto text-xs px-2 py-1 h-auto w-full">
+                          Go to My Tasks
                         </Button>
                       </div>
                     </Card>
-                  ))}
+                    );
+                  })}
                 </div>
+                  )}
+                  
+                  {/* Standalone Tasks */}
+                  {standalonePendingTasks.length > 0 && (
+                    <div className="space-y-2">
+                      <h3 className="text-sm md:text-base font-semibold text-gray-300 mb-2">
+                        {projects && projects.length > 0 ? 'Other Tasks' : 'Your Tasks'}
+                      </h3>
+                      {standalonePendingTasks.slice(0, 5).map((task) => (
+                        <div key={task.id} className="flex items-center justify-between bg-gray-900 border border-gray-800 rounded-lg px-3 py-2">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm text-white font-semibold line-clamp-1">{task.title}</p>
+                            {task.description && (
+                              <p className="text-xs text-gray-400 line-clamp-2">{task.description}</p>
+                            )}
+                          </div>
+                          <span className="text-xs text-gray-300 capitalize ml-3">{task.status.replace('-', ' ')}</span>
+                        </div>
+                      ))}
+                      {standalonePendingTasks.length > 5 && (
+                        <p className="text-xs text-gray-400">+{standalonePendingTasks.length - 5} more tasks</p>
+                      )}
+                    </div>
+                  )}
+                </>
               ) : (
                 <EmptyState
-                  title="No projects assigned"
-                  description="You'll see your assigned projects here."
+                  title="No tasks assigned"
+                  description="You'll see your assigned tasks here."
                   icon={
                     <svg className="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path
