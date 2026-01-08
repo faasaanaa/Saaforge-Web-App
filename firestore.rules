@@ -10,8 +10,8 @@ service cloud.firestore {
     function isOwner() {
       // Only these specific email addresses have owner access
       return isAuthenticated() && 
-             (request.auth.token.email == 'saaforge@gmail.com' ||
-              request.auth.token.email == 'emsaadsaad580@gmail.com');
+             (request.auth.email == 'saaforge@gmail.com' ||
+              request.auth.email == 'emsaadsaad580@gmail.com');
     }
     
     function isTeamMember() {
