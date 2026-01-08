@@ -77,20 +77,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 userId: fbUser.uid,
                 updatedAt: Timestamp.now(),
               });
-              console.log('Migrated email-based profile to UID');
               // Delete email profile after migration
               await deleteDoc(emailProfileRef);
-              console.log('Deleted email-based profile');
             } catch (error) {
-              console.error('Error migrating profile:', error);
+              // Migration error - silent fail
             }
           } else if (emailProfileDoc.exists() && uidProfileDoc.exists()) {
             // Both exist, delete email profile
             try {
               await deleteDoc(emailProfileRef);
-              console.log('Deleted duplicate email-based profile');
             } catch (error) {
-              console.error('Error deleting email profile:', error);
+              // Deletion error - silent fail
             }
           }
         }
@@ -100,7 +97,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIsTeamApproved(isApproved);
       }
     } catch (error) {
-      console.error('Error checking and caching approval:', error);
       setIsTeamApproved(false);
     }
   };
@@ -157,7 +153,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                   try {
                     await setDoc(userDocRef, ownerUser);
                   } catch (error) {
-                    console.error('Error creating owner document:', error);
+                    // Owner document creation error - silent fail
                   }
                   // Owners don't need approval check
                   setIsTeamApproved(false);
@@ -180,7 +176,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                   setTeamApprovalChecked(true);
                 }
               } catch (error) {
-                console.error('Error in user document listener:', error);
                 setLoading(false);
               }
             });
@@ -195,14 +190,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setLoading(false);
           }
         } catch (error) {
-          console.error('Error in auth state change:', error);
           setLoading(false);
         }
       });
 
     return () => unsubscribe();
     } catch (error) {
-      console.error('Firebase initialization error:', error);
       setLoading(false);
     }
   }, []);

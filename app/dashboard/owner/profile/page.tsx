@@ -98,7 +98,7 @@ export default function OwnerProfilePage() {
         });
       }
     } catch (error) {
-      console.error('Error loading profile:', error);
+      // Profile load error - silent fail
     } finally {
       setLoading(false);
     }
@@ -121,7 +121,6 @@ export default function OwnerProfilePage() {
       
       alert('Profile updated successfully!');
     } catch (error) {
-      console.error('Error saving profile:', error);
       alert('Failed to save profile. Please try again.');
     } finally {
       setSaving(false);

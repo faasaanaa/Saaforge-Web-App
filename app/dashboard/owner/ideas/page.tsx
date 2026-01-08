@@ -35,7 +35,6 @@ export default function IdeasRequestsPage() {
       });
       alert('Idea approved successfully!');
     } catch (error) {
-      console.error('Error approving idea:', error);
       alert('Failed to approve idea');
     } finally {
       setProcessingId(null);
@@ -59,7 +58,6 @@ export default function IdeasRequestsPage() {
       setReviewNotes('');
       alert('Idea rejected successfully!');
     } catch (error) {
-      console.error('Error rejecting idea:', error);
       alert('Failed to reject idea');
     } finally {
       setProcessingId(null);
@@ -81,7 +79,6 @@ export default function IdeasRequestsPage() {
       setReviewNotes('');
       alert('Review added successfully!');
     } catch (error) {
-      console.error('Error adding review:', error);
       alert('Failed to add review');
     } finally {
       setProcessingId(null);

@@ -48,7 +48,6 @@ function ProjectDetailContent() {
       });
       alert('Team assignments updated successfully!');
     } catch (error) {
-      console.error('Error updating assignments:', error);
       alert('Failed to update assignments. Please try again.');
     } finally {
       setSavingAssignments(false);

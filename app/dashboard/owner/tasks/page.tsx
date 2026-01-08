@@ -148,7 +148,6 @@ export default function ManageTasksPage() {
 
       setShowTaskModal(false);
     } catch (error) {
-      console.error('Failed to save task:', error);
       alert('Failed to save task. Please try again.');
     }
   };
@@ -174,7 +173,6 @@ export default function ManageTasksPage() {
 
       setShowGradeModal(false);
     } catch (error) {
-      console.error('Failed to submit grade:', error);
       alert('Failed to submit grade. Please try again.');
     }
   };
@@ -185,7 +183,6 @@ export default function ManageTasksPage() {
     try {
       await deleteDocument('tasks', task.id!);
     } catch (error) {
-      console.error('Failed to delete task:', error);
       alert('Failed to delete task. Please try again.');
     }
   };

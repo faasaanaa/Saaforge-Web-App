@@ -144,7 +144,6 @@ export default function OwnerProjectsPage() {
       setShowModal(false);
       setEditingProject(null);
     } catch (error) {
-      console.error('Failed to save project:', error);
       alert('Failed to save project. Please try again.');
     } finally {
       setSaving(false);
@@ -159,7 +158,6 @@ export default function OwnerProjectsPage() {
       await deleteDocument('projects', project.id);
       await logAudit('project.deleted', user.uid, { projectId: project.id, name: project.name });
     } catch (error) {
-      console.error('Failed to delete project:', error);
       alert('Failed to delete project. Please try again.');
     }
   };

@@ -48,7 +48,6 @@ export default function FeedbackPage() {
         isApproved: true,
       });
     } catch (error) {
-      console.error('Failed to approve feedback:', error);
       alert('Failed to approve feedback');
     }
   };
@@ -59,7 +58,6 @@ export default function FeedbackPage() {
     try {
       await deleteDocument('projectFeedback', feedback.id);
     } catch (error) {
-      console.error('Failed to delete feedback:', error);
       alert('Failed to delete feedback');
     }
   };

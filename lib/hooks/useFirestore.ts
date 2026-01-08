@@ -52,14 +52,12 @@ export function useDocument<T>(collectionName: string, documentId: string | null
           },
           (err) => {
             if (!mounted) return;
-            console.error(`Error fetching ${collectionName}/${documentId}:`, err);
             setError(err as Error);
             setLoading(false);
           }
         );
       } catch (err) {
         if (!mounted) return;
-        console.error(`Firebase initialization error for ${collectionName}/${documentId}:`, err);
         setError(err as Error);
         setLoading(false);
       }
@@ -114,14 +112,12 @@ export function useCollection<T>(
           },
           (err) => {
             if (!mounted) return;
-            console.error(`Error fetching ${collectionName}:`, err);
             setError(err as Error);
             setLoading(false);
           }
         );
       } catch (err) {
         if (!mounted) return;
-        console.error(`Firebase initialization error for ${collectionName}:`, err);
         setError(err as Error);
         setLoading(false);
       }

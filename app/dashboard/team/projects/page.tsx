@@ -76,7 +76,6 @@ export default function BrowseProjectsPage() {
       setApplicationModal(null);
       setMessage('');
     } catch (error) {
-      console.error('Failed to submit application:', error);
       alert('Failed to submit application. Please try again.');
     } finally {
       setSubmitting(false);

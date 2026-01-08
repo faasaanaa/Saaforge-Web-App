@@ -22,7 +22,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 async function cleanupDuplicateProfiles() {
-  console.log('🔍 Searching for duplicate teamProfiles...\n');
+  // Searching for duplicate teamProfiles...
   
   try {
     const teamProfilesRef = collection(db, 'teamProfiles');
@@ -33,41 +33,25 @@ async function cleanupDuplicateProfiles() {
     
     snapshot.forEach((doc) => {
       const id = doc.id;
-      const data = doc.data();
       
       // Email-based IDs contain @ symbol
       if (id.includes('@')) {
         emailBasedDocs.push(id);
-        console.log(`📧 Email-based profile: ${id}`);
-        console.log(`   Name: ${data.name}, Approved: ${data.isApproved}`);
       } else {
         uidBasedDocs.push(id);
-        console.log(`✅ UID-based profile: ${id}`);
-        console.log(`   Name: ${data.name}, Approved: ${data.isApproved}`);
       }
     });
     
-    console.log(`\n📊 Summary:`);
-    console.log(`   Email-based profiles: ${emailBasedDocs.length}`);
-    console.log(`   UID-based profiles: ${uidBasedDocs.length}`);
-    
     if (emailBasedDocs.length === 0) {
-      console.log('\n✨ No duplicate profiles found! All clean.');
       return;
     }
     
-    console.log(`\n🗑️  Deleting ${emailBasedDocs.length} email-based profiles...`);
-    
+    // Deleting email-based profiles...
     for (const emailId of emailBasedDocs) {
       await deleteDoc(doc(db, 'teamProfiles', emailId));
-      console.log(`   ✓ Deleted: ${emailId}`);
     }
     
-    console.log('\n✅ Cleanup complete! Only UID-based profiles remain.');
-    console.log('💡 Users will be migrated to UID-based profiles automatically on next login.');
-    
   } catch (error) {
-    console.error('❌ Error during cleanup:', error);
     throw error;
   }
 }
@@ -75,10 +59,8 @@ async function cleanupDuplicateProfiles() {
 // Run the cleanup
 cleanupDuplicateProfiles()
   .then(() => {
-    console.log('\n🎉 Done!');
     process.exit(0);
   })
   .catch((error) => {
-    console.error('\n💥 Cleanup failed:', error);
     process.exit(1);
   });

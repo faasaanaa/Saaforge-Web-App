@@ -54,7 +54,6 @@ export default function MyTasksPage() {
 
       await updateDocument<Task>('tasks', task.id!, updates);
     } catch (error) {
-      console.error('Failed to update task:', error);
       alert('Failed to update task status. Please try again.');
     }
   };

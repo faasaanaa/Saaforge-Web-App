@@ -49,7 +49,7 @@ export default function OwnerPage() {
         setOwnerProfile(profileData);
       }
     } catch (error) {
-      console.error('Error loading owner profile:', error);
+      // Profile load error - silent fail
     } finally {
       setLoading(false);
     }

@@ -23,7 +23,7 @@ export async function logAudit(
 
     await createDocument<AuditLog>('auditLogs', auditData);
   } catch (error) {
-    console.error('Failed to log audit:', error);
+    // Audit log error - silent fail
   }
 }
 

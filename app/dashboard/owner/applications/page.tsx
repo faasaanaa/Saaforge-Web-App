@@ -54,7 +54,6 @@ export default function ApplicationsPage() {
       });
       alert('Application approved! Now assign the user to the project.');
     } catch (error) {
-      console.error('Failed to approve:', error);
       alert('Failed to approve application.');
     } finally {
       setProcessing(null);
@@ -70,7 +69,6 @@ export default function ApplicationsPage() {
         status: 'rejected',
       });
     } catch (error) {
-      console.error('Failed to reject:', error);
       alert('Failed to reject application.');
     } finally {
       setProcessing(null);

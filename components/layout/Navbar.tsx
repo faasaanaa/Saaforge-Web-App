@@ -73,7 +73,6 @@ export function Navbar() {
           
           setIsTeamApproved(isApproved);
         } catch (error) {
-          console.error('Error checking team approval:', error);
           setIsTeamApproved(false);
         } finally {
           setCheckingApproval(false);
@@ -90,7 +89,7 @@ export function Navbar() {
     try {
       await signOut();
     } catch (error) {
-      console.error('Sign out failed:', error);
+      // Sign out error - silent fail
     }
   };
 

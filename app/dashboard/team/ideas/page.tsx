@@ -69,7 +69,6 @@ export default function TeamIdeasPage() {
       setShowForm(false);
       alert('Your new project idea has been submitted successfully!');
     } catch (error) {
-      console.error('Error submitting idea:', error);
       alert('Failed to submit idea. Please try again.');
     } finally {
       setSubmitting(false);

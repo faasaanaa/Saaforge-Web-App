@@ -48,7 +48,6 @@ export default function ContentEditorPage() {
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } catch (error) {
-      console.error('Error saving content:', error);
       alert('Failed to save content');
     } finally {
       setSaving(false);

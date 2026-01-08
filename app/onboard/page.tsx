@@ -174,7 +174,7 @@ function OnboardContent() {
       alert('Welcome to the team! Redirecting to your dashboard...');
       router.push('/dashboard/team');
     } catch (error) {
-      console.error('Failed to complete onboarding:', error);
+
       setError('Failed to complete onboarding. Please try again.');
     } finally {
       setSubmitting(false);

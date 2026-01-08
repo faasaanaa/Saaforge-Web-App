@@ -22,27 +22,6 @@ export default function TeamPage() {
   // Filter out old email-based duplicates (keep only UID-based profiles)
   const teamMembers = allTeamMembers?.filter(member => !member.id.includes('@'));
 
-  // Debug logging
-  useEffect(() => {
-    console.log('Team members loaded. Count:', teamMembers?.length || 0);
-    console.log('Team members raw data:', teamMembers);
-    if (teamMembers && teamMembers.length > 0) {
-      teamMembers.forEach(member => {
-        console.log('Team member details:', {
-          id: member.id,
-          name: member.name,
-          email: member.email,
-          isPubliclyVisible: member.isPubliclyVisible,
-          isApproved: member.isApproved,
-          hasPicture: !!member.profilePicture,
-          pictureUrl: member.profilePicture
-        });
-      });
-    } else {
-      console.log('No team members found with isPubliclyVisible=true and isApproved=true');
-    }
-  }, [teamMembers]);
-
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />

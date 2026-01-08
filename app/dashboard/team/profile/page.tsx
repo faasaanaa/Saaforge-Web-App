@@ -90,7 +90,6 @@ export default function TeamProfilePage() {
         
         // First try to load by UID
         if (profile) {
-          console.log('Profile found by UID:', user.uid);
           setLoadedProfile(profile);
           setIsLoadingProfile(false);
           return;
@@ -98,12 +97,10 @@ export default function TeamProfilePage() {
 
         // If not found by UID, try by email
         if (user.email) {
-          console.log('Profile not found by UID, trying email:', user.email);
           const emailProfileRef = doc(db, 'teamProfiles', user.email);
           const emailProfileDoc = await getDoc(emailProfileRef);
           
           if (emailProfileDoc.exists()) {
-            console.log('Profile found by email, migrating to UID');
             const emailProfile = { id: emailProfileDoc.id, ...emailProfileDoc.data() } as TeamProfile;
             setLoadedProfile(emailProfile);
             
@@ -111,7 +108,6 @@ export default function TeamProfilePage() {
             const uidProfileRef = doc(db, 'teamProfiles', user.uid);
             const uidProfileDoc = await getDoc(uidProfileRef);
             if (!uidProfileDoc.exists()) {
-              console.log('Creating profile at UID during migration');
               await setDoc(uidProfileRef, {
                 ...emailProfile,
                 userId: user.uid,
@@ -119,16 +115,12 @@ export default function TeamProfilePage() {
               });
               // Delete old email-based profile
               await deleteDoc(emailProfileRef);
-              console.log('Migration complete');
             }
-          } else {
-            console.log('No profile found by email or UID');
           }
         }
         
         setIsLoadingProfile(false);
       } catch (error) {
-        console.error('Error loading team profile:', error);
         setIsLoadingProfile(false);
       }
     };
@@ -203,15 +195,12 @@ export default function TeamProfilePage() {
       reader.onloadend = () => {
         const base64String = reader.result as string;
         setProfilePicture(base64String);
-        console.log('Picture converted to base64');
       };
       reader.onerror = () => {
-        console.error('Error reading file');
         alert('Failed to upload picture. Please try again.');
       };
       reader.readAsDataURL(file);
     } catch (error) {
-      console.error('Error uploading picture:', error);
       alert('Failed to upload picture. Please try again.');
     }
   };
@@ -234,9 +223,6 @@ export default function TeamProfilePage() {
       // Ensure we have createdAt and isApproved from existing profile
       const createdAt = profileToUpdate?.createdAt || Timestamp.now();
       const isApproved = profileToUpdate?.isApproved ?? true; // Preserve approval status
-
-      console.log('Saving team profile to UID:', user.uid);
-      console.log('Profile picture URL:', profilePicture ? 'set' : 'empty');
 
       // Save profile using setDoc with merge to preserve all fields
       const updateData: any = {
@@ -275,17 +261,14 @@ export default function TeamProfilePage() {
           const emailProfileDoc = await getDoc(emailProfileRef);
           if (emailProfileDoc.exists()) {
             await deleteDoc(emailProfileRef);
-            console.log('Deleted old email-based profile:', user.email);
           }
         } catch (error) {
-          console.error('Error cleaning up email-based profile:', error);
+          // Cleanup error - silent fail
         }
       }
 
-      console.log('Profile saved successfully to UID:', user.uid);
       alert('Profile updated successfully!');
     } catch (error) {
-      console.error('Failed to update profile:', error);
       alert('Failed to update profile. Please try again.');
     } finally {
       setSaving(false);

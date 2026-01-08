@@ -39,7 +39,7 @@ export default function ChatPage() {
         try {
           await updateDocument('messages', msg.id, { isRead: true });
         } catch (error) {
-          console.error('Error marking message as read:', error);
+          // Mark as read error - silent fail
         }
       });
     }, [messages, user]);
@@ -70,7 +70,6 @@ export default function ChatPage() {
 
       setMessage('');
     } catch (error) {
-      console.error('Failed to send message:', error);
       alert('Failed to send message. Please try again.');
     } finally {
       setSending(false);

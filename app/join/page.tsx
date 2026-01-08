@@ -113,7 +113,6 @@ export default function JoinPage() {
       }, 3000);
     } catch (err) {
       setError('Failed to submit request. Please try again.');
-      console.error(err);
     } finally {
       setLoading(false);
     }

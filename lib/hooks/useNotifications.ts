@@ -62,7 +62,6 @@ export function useNotifications() {
           }
         },
         (error) => {
-          console.error('Error listening to notifications:', error);
           setCurrentNotification(null);
         }
       );
@@ -214,7 +213,6 @@ export function useNotifications() {
     try {
       const firestore = db;
       if (!firestore) {
-        console.error('Firestore not initialized');
         return;
       }
 
@@ -231,7 +229,7 @@ export function useNotifications() {
         { merge: true }
       );
     } catch (error) {
-      console.error('Error marking notifications as viewed:', error);
+      // Mark as viewed error - silent fail
     }
   }, [user]);
 

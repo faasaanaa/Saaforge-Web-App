@@ -136,7 +136,6 @@ export function FeedbackModal({
       alert('Thank you! Your feedback has been submitted successfully.');
       onClose();
     } catch (error) {
-      console.error('Failed to submit feedback:', error);
       setError('Failed to submit feedback. Please try again.');
     } finally {
       setLoading(false);

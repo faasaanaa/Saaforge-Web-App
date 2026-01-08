@@ -78,7 +78,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     try {
       await signOut();
     } catch (error) {
-      console.error('Sign out failed:', error);
+      // Sign out error - silent fail
     }
   };
 

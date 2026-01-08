@@ -65,15 +65,8 @@ export default function JoinRequestsPage() {
         isApproved: true,
       };
 
-      console.log('Creating team profile for UID:', request.userId);
-      console.log('Profile data before creation:', profileData);
-
       // Create teamProfile using UID to prevent duplicates
       const createdProfile = await createDocument<TeamProfile>('teamProfiles', profileData, request.userId);
-
-      console.log('Team profile created successfully!');
-      console.log('Created profile:', createdProfile);
-      console.log('Document ID should be:', request.email);
 
       // Update request status
       await updateDocument<JoinRequest>('joinRequests', request.id, {
@@ -96,7 +89,6 @@ export default function JoinRequestsPage() {
 
       alert(`${request.name} has been added to the team!`);
     } catch (error) {
-      console.error('Failed to approve request:', error);
       alert('Failed to approve request. Please try again.');
     } finally {
       setProcessing(null);
@@ -122,7 +114,6 @@ export default function JoinRequestsPage() {
         name: request.name,
       });
     } catch (error) {
-      console.error('Failed to reject request:', error);
       alert('Failed to reject request. Please try again.');
     } finally {
       setProcessing(null);
