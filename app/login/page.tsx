@@ -66,19 +66,14 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black to-gray-900 px-4">
+    <main className="allow-video min-h-screen flex items-center justify-center px-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
         className="w-full max-w-md"
       >
-        <div className="text-center mb-8">
-          <Link href="/" className="inline-block">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-200 via-gray-100 to-gray-300 bg-clip-text text-transparent mb-2">Saaforge</h1>
-          </Link>
-          <p className="text-gray-300">Sign in to your account</p>
-        </div>
+        {/* header removed */}
 
         <Card>
           {error && (
@@ -192,6 +187,6 @@ export default function LoginPage() {
           </div>
         </Card>
       </motion.div>
-    </div>
+    </main>
   );
 }

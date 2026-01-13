@@ -83,7 +83,12 @@ service cloud.firestore {
     // ============================================
     // Invite codes for team registration
     match /inviteCodes/{codeId} {
-      allow read: if isAuthenticated();
+      // Allow authenticated reads. Also allow unauthenticated reads when the
+      // requested codeId matches the public join code string so the client can
+      // validate that specific shared code without requiring a prior read of
+      // the document's fields (avoids permission errors when the doc may not
+      // yet exist).
+      allow read: if isAuthenticated() || codeId == 'join@sasforge_02';
       allow create: if isOwner();
       allow update: if isOwner() || (isAuthenticated() && resource.data.email == request.auth.token.email);
       allow delete: if isOwner();

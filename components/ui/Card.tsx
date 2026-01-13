@@ -11,7 +11,7 @@ interface CardProps {
 
 export function Card({ children, className = '', hover = false, dark = true, onClick }: CardProps) {
   const baseClasses = dark
-    ? 'crystal-glass rounded-xl'
+    ? 'glass-3d rounded-xl'
     : 'bg-white rounded-xl shadow-md';
   
   const hoverEffect = hover && dark
@@ -26,7 +26,9 @@ export function Card({ children, className = '', hover = false, dark = true, onC
       onClick={onClick}
       className={`${baseClasses} ${hover && dark ? 'crystal-glass-hover' : ''} p-6 transition-all ${className}`}
     >
-      {children}
+      <div className="card-content relative z-10">
+        {children}
+      </div>
     </motion.div>
   );
 }

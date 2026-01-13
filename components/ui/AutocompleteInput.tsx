@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 interface AutocompleteInputProps {
   label: string;
@@ -10,6 +11,8 @@ interface AutocompleteInputProps {
   placeholder?: string;
   helperText?: string;
   required?: boolean;
+  error?: string;
+  className?: string;
 }
 
 export function AutocompleteInput({
@@ -20,16 +23,25 @@ export function AutocompleteInput({
   placeholder,
   helperText,
   required = false,
+  error,
+  className = '',
 }: AutocompleteInputProps) {
   const [inputValue, setInputValue] = useState('');
   const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const suggestionRef = useRef<HTMLDivElement | null>(null);
+  const [dropdownStyle, setDropdownStyle] = useState<{ left: number; top: number; width: number } | null>(null);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      if (
+        wrapperRef.current &&
+        !wrapperRef.current.contains(target) &&
+        !(suggestionRef.current && suggestionRef.current.contains(target))
+      ) {
         setShowSuggestions(false);
       }
     }
@@ -37,6 +49,24 @@ export function AutocompleteInput({
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  const updateDropdownPosition = () => {
+    const el = inputRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    setDropdownStyle({ left: rect.left + window.scrollX, top: rect.bottom + window.scrollY, width: rect.width });
+  };
+
+  useEffect(() => {
+    if (showSuggestions) updateDropdownPosition();
+    const onResize = () => showSuggestions && updateDropdownPosition();
+    window.addEventListener('resize', onResize);
+    window.addEventListener('scroll', onResize, true);
+    return () => {
+      window.removeEventListener('resize', onResize);
+      window.removeEventListener('scroll', onResize, true);
+    };
+  }, [showSuggestions]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target.value;
@@ -125,49 +155,57 @@ export function AutocompleteInput({
           onKeyDown={handleKeyDown}
           onFocus={() => inputValue && setShowSuggestions(true)}
           placeholder={placeholder}
-          className="w-full px-4 py-2 rounded-lg border border-gray-700 bg-gray-950 text-gray-100 placeholder:text-gray-500 focus:ring-2 focus:ring-gray-500 focus:border-transparent outline-none transition-all"
+          className={`w-full px-4 py-2 rounded-lg border bg-gray-950 text-gray-100 placeholder:text-gray-500 focus:ring-2 focus:ring-gray-500 focus:border-transparent outline-none transition-all ${error ? 'border-red-500' : 'border-gray-700'} ${className}`}
         />
+        {/* Suggestions dropdown rendered in a portal so it's not clipped by parent overflow */}
+        {showSuggestions && dropdownStyle && filteredSuggestions.length > 0 && createPortal(
+          <div ref={suggestionRef} style={{ position: 'absolute', left: dropdownStyle.left, top: dropdownStyle.top, width: dropdownStyle.width }} className="z-50">
+            <div className="bg-gray-900 border border-gray-700 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+              {filteredSuggestions.map((suggestion, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  onClick={() => handleAddValue(suggestion)}
+                  className="w-full text-left px-4 py-2 text-gray-100 hover:bg-gray-800 focus:bg-gray-800 focus:outline-none transition-colors"
+                >
+                  {suggestion}
+                </button>
+              ))}
+              {filteredSuggestions.length > 0 && inputValue.trim() && (
+                <button
+                  type="button"
+                  onClick={() => handleAddValue(inputValue.trim())}
+                  className="w-full text-left px-4 py-2 border-t border-gray-700 text-gray-300 hover:bg-gray-800 focus:bg-gray-800 focus:outline-none"
+                >
+                  Add "{inputValue.trim()}" (Other)
+                </button>
+              )}
+            </div>
+          </div>,
+          document.body
+        )}
 
-        {/* Suggestions dropdown */}
-        {showSuggestions && filteredSuggestions.length > 0 && (
-          <div className="absolute z-10 w-full mt-1 bg-gray-900 border border-gray-700 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-            {filteredSuggestions.map((suggestion, index) => (
-              <button
-                key={index}
-                type="button"
-                onClick={() => handleAddValue(suggestion)}
-                className="w-full text-left px-4 py-2 text-gray-100 hover:bg-gray-800 focus:bg-gray-800 focus:outline-none transition-colors"
-              >
-                {suggestion}
-              </button>
-            ))}
-            {filteredSuggestions.length > 0 && inputValue.trim() && (
+        {showSuggestions && dropdownStyle && filteredSuggestions.length === 0 && inputValue.trim() && createPortal(
+          <div ref={suggestionRef} style={{ position: 'absolute', left: dropdownStyle.left, top: dropdownStyle.top, width: dropdownStyle.width }} className="z-50">
+            <div className="bg-gray-900 border border-gray-700 rounded-lg shadow-lg">
               <button
                 type="button"
                 onClick={() => handleAddValue(inputValue.trim())}
-                className="w-full text-left px-4 py-2 border-t border-gray-700 text-gray-300 hover:bg-gray-800 focus:bg-gray-800 focus:outline-none"
+                className="w-full text-left px-4 py-2 text-gray-300 hover:bg-gray-800 focus:bg-gray-800 focus:outline-none"
               >
                 Add "{inputValue.trim()}" (Other)
               </button>
-            )}
-          </div>
-        )}
-
-        {/* Show "Others" option when no suggestions but has input */}
-        {showSuggestions && filteredSuggestions.length === 0 && inputValue.trim() && (
-          <div className="absolute z-10 w-full mt-1 bg-gray-900 border border-gray-700 rounded-lg shadow-lg">
-            <button
-              type="button"
-              onClick={() => handleAddValue(inputValue.trim())}
-              className="w-full text-left px-4 py-2 text-gray-300 hover:bg-gray-800 focus:bg-gray-800 focus:outline-none"
-            >
-              Add "{inputValue.trim()}" (Other)
-            </button>
-          </div>
+            </div>
+          </div>,
+          document.body
         )}
       </div>
 
-      {helperText && <p className="text-sm text-gray-400">{helperText}</p>}
+      {error ? (
+        <p className="text-sm text-red-400 mt-1">{error}</p>
+      ) : (
+        helperText && <p className="text-sm text-gray-400">{helperText}</p>
+      )}
     </div>
   );
 }

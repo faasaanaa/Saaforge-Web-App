@@ -96,8 +96,17 @@ export function Navbar() {
   // Show Dashboard if: owner OR (approved team member)
   const canShowDashboard = user?.role === 'owner' || (user?.role === 'team' && isTeamApproved);
 
+  // Hide navbar on dashboard owner/team pages and on auth pages (login/register)
+  if (typeof pathname === 'string' && (
+    pathname.startsWith('/dashboard/owner') ||
+    pathname.startsWith('/dashboard/team') ||
+    pathname === '/login' ||
+    pathname === '/register'
+  )) {
+    return null;
+  }
   return (
-    <nav className="bg-gradient-to-r from-black via-gray-900 to-black shadow-lg shadow-gray-900/50 sticky top-0 z-30 backdrop-blur-sm bg-opacity-95 border-b border-gray-800" suppressHydrationWarning>
+    <nav className="absolute inset-x-0 top-0 w-full z-50 bg-transparent" suppressHydrationWarning>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" suppressHydrationWarning>
         <div className="flex justify-between items-center h-16" suppressHydrationWarning>
           <div className="flex items-center" suppressHydrationWarning>
@@ -186,17 +195,18 @@ export function Navbar() {
             ) : (
               <>
                 {ctaLinks.map((link) => (
-                  <Link key={link.href} href={link.href}>
-                    <Button variant={link.href === '/order' ? 'primary' : 'outline'} size="sm">
-                      {link.label}
-                    </Button>
-                  </Link>
-                ))}
-                <Link href="/login">
-                  <Button variant="ghost" size="sm">
-                    Login
+                  <Button
+                    key={link.href}
+                    variant={link.href === '/order' ? 'primary' : 'outline'}
+                    size="sm"
+                    onClick={() => router.push(link.href)}
+                  >
+                    {link.label}
                   </Button>
-                </Link>
+                ))}
+                <Button variant="ghost" size="sm" onClick={() => router.push('/login')}>
+                  Login
+                </Button>
               </>
             )}
           </div>
@@ -271,7 +281,10 @@ export function Navbar() {
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: publicLinks.length * 0.1 }}
                         >
-                          <button
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-full"
                             onClick={() => {
                               setMobileMenuOpen(false);
                               if (isOwner) {
@@ -280,12 +293,9 @@ export function Navbar() {
                                 router.push('/dashboard/team');
                               }
                             }}
-                            className="w-full"
                           >
-                            <Button variant="outline" size="sm" className="w-full">
-                              Dashboard
-                            </Button>
-                          </button>
+                            Dashboard
+                          </Button>
                         </motion.div>
                       )}
                       <motion.div
@@ -307,15 +317,17 @@ export function Navbar() {
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: (publicLinks.length + index) * 0.1 }}
                         >
-                          <Link key={link.href} href={link.href} onClick={() => setMobileMenuOpen(false)}>
-                            <Button
-                              variant={link.href === '/order' ? 'primary' : 'outline'}
-                              size="sm"
-                              className="w-full"
-                            >
-                              {link.label}
-                            </Button>
-                          </Link>
+                          <Button
+                            variant={link.href === '/order' ? 'primary' : 'outline'}
+                            size="sm"
+                            className="w-full"
+                            onClick={() => {
+                              setMobileMenuOpen(false);
+                              router.push(link.href);
+                            }}
+                          >
+                            {link.label}
+                          </Button>
                         </motion.div>
                       ))}
                       <motion.div
@@ -323,11 +335,17 @@ export function Navbar() {
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: (publicLinks.length + ctaLinks.length) * 0.1 }}
                       >
-                        <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
-                          <Button variant="ghost" size="sm" className="w-full">
-                            Login
-                          </Button>
-                        </Link>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="w-full"
+                          onClick={() => {
+                            setMobileMenuOpen(false);
+                            router.push('/login');
+                          }}
+                        >
+                          Login
+                        </Button>
                       </motion.div>
                     </>
                   )}

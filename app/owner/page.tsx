@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Navbar } from '@/components/layout/Navbar';
+// Navbar provided by root layout
 import { Footer } from '@/components/layout/Footer';
 import { Card } from '@/components/ui/Card';
 import { LoadingSpinner } from '@/components/ui/Loading';
@@ -58,7 +58,6 @@ export default function OwnerPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Navbar />
         <main className="flex-grow flex items-center justify-center">
           <LoadingSpinner size="lg" />
         </main>
@@ -69,12 +68,11 @@ export default function OwnerPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
-      
-      <main className="flex-grow">
+      <main className="flex-grow relative allow-video">
+
         {/* Hero Section */}
-        <section className="bg-gradient-to-br from-black via-gray-900 to-black py-20">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="relative overflow-hidden py-16 md:py-24 min-h-[58vh] md:min-h-screen flex items-center">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -178,7 +176,9 @@ export default function OwnerPage() {
         </section>
 
         {/* About Section */}
-        <section className="py-20 bg-gradient-to-b from-gray-900 to-black">
+        <div className="relative">
+          <div className="relative z-10">
+        <section className="py-20 bg-transparent">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div
               initial={{ opacity: 0 }}
@@ -217,7 +217,7 @@ export default function OwnerPage() {
         </section>
 
         {/* Skills Section */}
-        <section className="py-20 bg-gradient-to-b from-black to-gray-900">
+        <section className="py-20 bg-transparent">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div
               initial={{ opacity: 0 }}
@@ -255,7 +255,7 @@ export default function OwnerPage() {
         </section>
 
         {/* Achievements Section */}
-        <section className="py-20 bg-gradient-to-b from-gray-900 to-black">
+        <section className="py-20 bg-transparent">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div
               initial={{ opacity: 0 }}
@@ -296,7 +296,7 @@ export default function OwnerPage() {
 
         {/* Experience Section */}
         {ownerProfile?.experience && ownerProfile.experience.length > 0 && (
-          <section className="py-20 bg-gradient-to-b from-gray-900 to-black">
+          <section className="py-20 bg-transparent">
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
               <motion.div
                 initial={{ opacity: 0 }}
@@ -332,7 +332,7 @@ export default function OwnerPage() {
 
         {/* Portfolio Links Section */}
         {ownerProfile?.portfolioLinks && ownerProfile.portfolioLinks.length > 0 && (
-          <section className="py-20 bg-gradient-to-b from-black to-gray-900">
+          <section className="py-20 bg-transparent">
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
               <motion.div
                 initial={{ opacity: 0 }}
@@ -386,7 +386,7 @@ export default function OwnerPage() {
 
         {/* Social Handles Section */}
         {ownerProfile?.socialLinks && Object.values(ownerProfile.socialLinks).some(link => link) && (
-          <section className="py-20 bg-gradient-to-b from-gray-900 to-black">
+          <section className="py-20 bg-transparent">
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
               <motion.div
                 initial={{ opacity: 0 }}
@@ -572,8 +572,8 @@ export default function OwnerPage() {
         )}
 
         {/* Interests Section */}
-        <section className="py-20 bg-gradient-to-b from-black to-gray-900">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="py-20">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <motion.div
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
@@ -605,6 +605,8 @@ export default function OwnerPage() {
             </motion.div>
           </div>
         </section>
+      </div>
+    </div>
       </main>
 
       <Footer />

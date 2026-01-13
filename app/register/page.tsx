@@ -46,8 +46,13 @@ export default function RegisterPage() {
     }
 
     try {
-      await registerWithInviteCode(formData.email, formData.password, formData.inviteCode);
-      router.push('/');
+      const result = await registerWithInviteCode(formData.email, formData.password, formData.inviteCode);
+      // If the invite allows any email or was linked to a join request, treat as auto-approved
+      if (result?.invite?.ignoreEmail || result?.invite?.requestId) {
+        router.push('/dashboard/team');
+      } else {
+        router.push('/');
+      }
     } catch (err: any) {
       setError(err.message || 'Failed to register. Please check your invite code.');
     } finally {

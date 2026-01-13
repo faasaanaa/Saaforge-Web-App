@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Navbar } from '@/components/layout/Navbar';
+// Navbar provided by root layout
 import { Footer } from '@/components/layout/Footer';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
@@ -192,7 +192,6 @@ function OnboardContent() {
   if (error || !inviteCode) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Navbar />
         <main className="flex-grow flex items-center justify-center">
           <Card className="max-w-md">
             <div className="text-center">
@@ -210,8 +209,6 @@ function OnboardContent() {
 
   return (
     <div className="min-h-screen flex flex-col" suppressHydrationWarning>
-      <Navbar />
-      
       <main className="flex-grow py-20 bg-gray-50">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div

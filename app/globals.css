@@ -1,16 +1,42 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:is(.dark *));
+
 :root {
   /* Premium Dark Theme - matching black & silver icon */
-  --background: #0a0a0a;
-  --foreground: #e8e8e8;
-  --primary: #1a1a1a;
-  --secondary: #2a2a2a;
-  --accent: #c0c0c0;
+  --primary: oklch(0.205 0 0);
+  --secondary: oklch(0.97 0 0);
+  --accent: oklch(0.97 0 0);
   --accent-dark: #808080;
-  --border: #333333;
-  --card: #1a1a1a;
-  --card-foreground: #f5f5f5;
+  --border: oklch(0.922 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --radius: 0.625rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
 }
 
 @theme inline {
@@ -18,12 +44,45 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
 }
 
 body {
-  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
   min-height: 100vh;
 }
 
@@ -65,22 +124,143 @@ body {
 
 /* Crystal Glass Morphism */
 .crystal-glass {
-  background: rgba(30, 25, 45, 0.4);
-  border: 1px solid rgba(139, 92, 246, 0.3);
-  backdrop-filter: blur(20px);
-  box-shadow: 
-    0 0 30px rgba(139, 92, 246, 0.2),
-    inset 0 1px 2px rgba(255, 255, 255, 0.1),
-    inset 0 -1px 2px rgba(0, 0, 0, 0.3);
+  background: rgba(8,10,14,0.22); /* slightly darker translucent tint so video shows through */
+  border: none; /* removed purple border for clean panels */
+  backdrop-filter: blur(12px);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.45); /* subtle shadow for depth */
 }
 
 .crystal-glass-hover:hover {
-  background: rgba(30, 25, 45, 0.5);
-  border-color: rgba(139, 92, 246, 0.5);
-  box-shadow: 
-    0 0 40px rgba(139, 92, 246, 0.3),
-    inset 0 1px 2px rgba(255, 255, 255, 0.15),
-    inset 0 -1px 2px rgba(0, 0, 0, 0.3);
+  background: rgba(30, 25, 45, 0.55);
+  border: none;
+  box-shadow: 0 14px 50px rgba(0,0,0,0.7);
+}
+
+/* Glass 3D variant for project and feature cards */
+.glass-3d {
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+  border: 1px solid rgba(255,255,255,0.06);
+  backdrop-filter: blur(14px) saturate(120%);
+  box-shadow: 0 14px 35px rgba(2,6,23,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+  position: relative;
+  overflow: hidden;
+}
+.glass-3d::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, rgba(139,92,246,0.06), rgba(99,102,241,0.03));
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+.glass-3d:hover {
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: 0 20px 50px rgba(2,6,23,0.7), 0 6px 18px rgba(99,102,241,0.08);
+}
+
+/* Subtle star-edge glow and corner sparkles for premium effect */
+.glass-3d::after {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 0;
+  background-image: 
+    radial-gradient(12px 12px at 92% 6%, rgba(255,255,255,0.95), rgba(255,255,255,0) 35%),
+    radial-gradient(10px 10px at 6% 92%, rgba(255,255,255,0.8), rgba(255,255,255,0) 35%),
+    linear-gradient(90deg, rgba(139,92,246,0.12), rgba(99,102,241,0.06));
+  filter: blur(10px) saturate(120%);
+  opacity: 0.9;
+  mix-blend-mode: screen;
+  transition: opacity 250ms ease, transform 300ms ease;
+}
+.glass-3d:hover::after {
+  transform: scale(1.02);
+  opacity: 1;
+}
+
+/* tiny animated sparkles along the edge */
+.glass-3d::before { /* extend existing overlay but keep it above glow */
+  z-index: 1;
+}
+.glass-3d .edge-sparkle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 70%);
+  filter: blur(2px);
+  opacity: 0.9;
+  pointer-events: none;
+  animation: sparkle 1800ms linear infinite;
+}
+.glass-3d .edge-sparkle.s1 { top: 8px; right: 18px; animation-delay: 0ms; }
+.glass-3d .edge-sparkle.s2 { bottom: 10px; left: 18px; animation-delay: 400ms; }
+.glass-3d .edge-sparkle.s3 { top: 12px; left: 14px; animation-delay: 800ms; }
+
+@keyframes sparkle {
+  0% { transform: translateY(0) scale(0.9); opacity: 0.6 }
+  50% { transform: translateY(-2px) scale(1.1); opacity: 1 }
+  100% { transform: translateY(0) scale(0.9); opacity: 0.6 }
+}
+
+
+/* Force-remove any stray outlines or thin decorative lines on crystal panels */
+.crystal-glass *,
+.crystal-glass::before,
+.crystal-glass::after {
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Solid Crystal button (non-transparent) */
+.crystal-solid {
+  background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+  color: #fff;
+  border: 1px solid rgba(139, 92, 246, 0.95);
+  box-shadow: 0 8px 30px rgba(139, 92, 246, 0.18);
+}
+.crystal-solid:hover {
+  background: linear-gradient(135deg, #9f7bff 0%, #7c3aed 100%);
+  box-shadow: 0 12px 40px rgba(139, 92, 246, 0.25);
+}
+
+/* Showcase card starlight edge + hover sparkle */
+.showcase-card {
+  position: relative;
+  overflow: visible;
+}
+.showcase-card::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgba(139,92,246,0.14), rgba(99,102,241,0.06));
+  filter: blur(10px);
+  opacity: 0;
+  transition: opacity 220ms ease;
+  pointer-events: none;
+  z-index: 0;
+}
+.showcase-card::after {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  right: 14px;
+  top: 10px;
+  background: radial-gradient(circle, #fff 0%, rgba(255,255,255,0) 60%);
+  filter: blur(2px);
+  opacity: 0.7;
+  transform: rotate(15deg);
+  z-index: 2;
+}
+.showcase-card:hover::before {
+  opacity: 1;
+}
+.showcase-card:hover {
+  transform: translateY(-6px);
 }
 
 /* Dark Crystalline Purple for links */
@@ -99,10 +279,126 @@ body {
   ::-webkit-scrollbar {
     display: none;
   }
-  
+
   /* Hide scrollbar for IE, Edge and Firefox */
   * {
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
   }
 }
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}
+
+@layer base {
+  /* Avoid applying borders to every element (causes thin separators on mobile). */
+  :where(input, textarea, select, button) {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Remove thin section separators and decorative borders on small screens
+   and force section borders to blend with the dark background. */
+@media (max-width: 1024px) {
+  /* Keep the page dark but avoid blanket removal of borders from
+     card and interactive components. Preserve known card classes. */
+  /* Only force a black background on pages that do NOT opt-in to showing
+     the global video background. Pages that want the video should add the
+     `allow-video` class to their `main` element. */
+  main:not(.allow-video),
+  main:not(.allow-video) section,
+  main:not(.allow-video) > section {
+    background-color: #000 !important;
+  }
+
+  /* Hide decorative dividers and the LogoLoop outlines */
+  hr,
+  .divider,
+  .section-divider,
+  .logoloop,
+  .logoloop__track {
+    border: none !important;
+    box-shadow: none !important;
+    background-color: #000 !important;
+  }
+
+  /* Remove thin separators on immediate children of sections, but
+     explicitly skip Card-like components, interactive controls and
+     absolutely-positioned overlay elements so background images remain visible. */
+  main section > *:not(.crystal-glass):not(.crystal-glass-hover):not(.premium-card):not(.card):not(a):not(button):not(input):not(select):not(textarea):not(svg):not(.absolute):not(.pointer-events-none) {
+    border-top: none !important;
+    border-bottom: none !important;
+    box-shadow: none !important;
+  }
+}
+
+/* Emergency override: remove any stray white bands between sections
+   Force section backgrounds, common dividers, SVG wrappers and pseudo-elements
+   to use the site's dark background so stray white rectangles are removed. */
+main, body, html {
+  background-color: #000 !important;
+}
+
+/* Pages that opt-in to showing the global background video should
+   make their main container transparent. Add a high-specificity override
+   so the global video can show through. */
+main.allow-video,
+main.allow-video > * {
+  background-color: transparent !important;
+}
+
+/* Ensure all direct children of main are dark unless they intentionally override */
+main > * {
+  background-color: transparent !important;
+}
+
+/* Force common decorative wrappers and separators to be dark */
+hr, .divider, .section-divider, svg, img, .decorative, .waves, .scroll-lines {
+  background: transparent !important;
+  fill: currentColor !important;
+}
+
+/* Defensive: hide any unexpected white bars that are full-width and small height */
+div[style*="background: white"], div[style*="background:#fff"], div[style*="background: #fff"] {
+  background: transparent !important;
+}
+
+/* Remove pseudo-element white backgrounds between sections */
+main > *::before, main > *::after {
+  background: transparent !important;
+}
+

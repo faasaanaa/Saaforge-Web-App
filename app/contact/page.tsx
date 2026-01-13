@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Navbar } from '@/components/layout/Navbar';
+// Navbar provided by root layout
 import { Footer } from '@/components/layout/Footer';
 import { Card } from '@/components/ui/Card';
 
@@ -25,11 +25,10 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-black to-gray-900">
-      <Navbar />
-      
+    <div className="min-h-screen flex flex-col">
       <main className="flex-grow py-16 px-4">
-        <div className="max-w-4xl mx-auto">
+        <div className="relative">
+          <div className="relative z-10 max-w-4xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -228,6 +227,7 @@ export default function ContactPage() {
             </motion.div>
           </motion.div>
         </div>
+      </div>
       </main>
 
       <Footer />

@@ -245,7 +245,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       </div>
 
       {/* Main Content */}
-      <div className="md:ml-64 bg-black min-h-screen pt-20 md:pt-8 px-4 md:px-8 pb-8">
+      <div className="md:ml-64 bg-black min-h-screen pt-20 md:pt-8 px-4 md:px-8 pb-8 panal_bg">
         {children}
       </div>
     </div>

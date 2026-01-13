@@ -68,6 +68,7 @@ export interface InviteCode {
   isUsed: boolean;
   usedBy?: string;
   usedAt?: Timestamp;
+  ignoreEmail?: boolean; // when true, any email may use this code
   createdBy: string;
   createdAt: Timestamp;
   expiresAt: Timestamp;

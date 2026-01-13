@@ -12,7 +12,8 @@ import {
 } from 'firebase/auth';
 import { collection, doc, getDoc, getDocs, query, setDoc, deleteDoc, Timestamp, onSnapshot, where } from 'firebase/firestore';
 import { getAuthInstance, getDb } from '@/lib/firebase/config';
-import { User, UserRole } from '@/lib/types';
+import { User, UserRole, InviteCode } from '@/lib/types';
+import { logAudit } from '@/lib/utils/helpers';
 
 const OWNER_EMAILS = ['saaforge@gmail.com', 'emsaadsaad580@gmail.com']; // Owner emails
 
@@ -25,7 +26,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
-  registerWithInviteCode: (email: string, password: string, inviteCode: string) => Promise<void>;
+  registerWithInviteCode: (email: string, password: string, inviteCode: string) => Promise<{ invite?: Partial<InviteCode> }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -281,7 +282,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     email: string,
     password: string,
     inviteCode: string
-  ) => {
+  ): Promise<{ invite?: Partial<InviteCode> }> => {
     const auth = getAuthInstance();
     const db = getDb();
     
@@ -298,7 +299,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       throw new Error('Invite code has already been used');
     }
 
-    if (invite.email !== email) {
+    // Allow invite documents to opt-out of email matching by setting `ignoreEmail: true`
+    if (!invite.ignoreEmail && invite.email !== email) {
       throw new Error('Invite code does not match email');
     }
 
@@ -359,6 +361,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
     });
+
+    // If this invite is linked to a join request, remove the join request and log audit (auto-approve)
+    if (invite.requestId) {
+      try {
+        await deleteDoc(doc(db, 'joinRequests', invite.requestId));
+        await logAudit('team.approved', userCredential.user.uid, { email }, invite.requestId, 'joinRequest');
+      } catch (err) {
+        // silent
+      }
+    }
+
+    // Return invite info so callers can decide on redirect/flow
+    return { invite: invite as Partial<InviteCode> };
   };
 
   return (

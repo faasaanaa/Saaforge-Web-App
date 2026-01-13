@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/contexts/AuthContext";
 import FaviconSpinnerClient from "@/components/layout/FaviconSpinnerClient";
+import { Navbar } from '@/components/layout/Navbar';
 
 const inter = Inter({
   subsets: ["latin"],
@@ -59,10 +60,26 @@ export default function RootLayout({
         />
       </head>
       <body className={`${inter.variable} font-sans antialiased`} suppressHydrationWarning>
-        <AuthProvider>
-          <FaviconSpinnerClient />
-          {children}
-        </AuthProvider>
+        <div className="fixed inset-x-0 top-0 bottom-0 md:bottom-0 z-0 pointer-events-none">
+          <video
+            src="/panal_bg.mp4"
+            autoPlay
+            muted
+            loop
+            playsInline
+            aria-hidden="true"
+            className="w-full h-full object-cover"
+            style={{ opacity: 0.14, filter: 'blur(1px)' }}
+          />
+        </div>
+        <div className="relative z-10">
+          <AuthProvider>
+            <FaviconSpinnerClient />
+            <Navbar />
+            {/* Galaxy removed — canvas disabled */}
+            {children}
+          </AuthProvider>
+        </div>
       </body>
     </html>
   );

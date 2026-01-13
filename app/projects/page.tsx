@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { Navbar } from '@/components/layout/Navbar';
+// Navbar provided by root layout
 import { Footer } from '@/components/layout/Footer';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -35,12 +35,12 @@ export default function ProjectsPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
-      
-      <main className="flex-grow">
-        {/* Hero Section */}
-        <section className="bg-gradient-to-br from-black via-gray-900 to-black py-20">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <main className="flex-grow relative allow-video">
+        {/* Galaxy removed */}
+        <div className="relative z-10">
+        {/* Hero Section (Galaxy behind title) */}
+        <section className="py-20 relative overflow-hidden">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -59,11 +59,11 @@ export default function ProjectsPage() {
         </section>
 
         {/* Projects Section */}
-        <section className="py-20 bg-gradient-to-b from-black to-gray-900">
+        <section className="py-20 bg-transparent">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {/* Project Type Toggle */}
             <div className="flex justify-center mb-12">
-              <div className="bg-gray-900 rounded-lg p-1 inline-flex gap-1 border border-gray-800">
+              <div className="bg-transparent rounded-lg p-1 inline-flex gap-1 border border-gray-800">
                 <button
                   onClick={() => setProjectType('all')}
                   className={`px-6 py-2 rounded-md font-medium transition-all ${
@@ -110,7 +110,7 @@ export default function ProjectsPage() {
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: index * 0.1 }}
                     viewport={{ once: true }}
-                    onClick={() => window.location.href = `/project?id=${project.id}`}
+                    onClick={() => router.push(`/project?id=${project.id}`)}
                     className="cursor-pointer"
                   >
                     <Card hover className="h-full flex flex-col">
@@ -170,6 +170,7 @@ export default function ProjectsPage() {
             )}
           </div>
         </section>
+        </div>
       </main>
 
       <Footer />

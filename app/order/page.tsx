@@ -3,12 +3,10 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { Navbar } from '@/components/layout/Navbar';
+// Navbar provided by root layout
 import { Footer } from '@/components/layout/Footer';
 import { Card } from '@/components/ui/Card';
-import { Input } from '@/components/ui/Input';
-import { Textarea } from '@/components/ui/Textarea';
-import { Button } from '@/components/ui/Button';
+import OrderStepperForm from './OrderStepperForm';
 import { createDocument } from '@/lib/hooks/useFirestore';
 import { Order, ServiceType } from '@/lib/types';
 import { useAuth } from '@/lib/contexts/AuthContext';
@@ -56,25 +54,23 @@ export default function OrderPage() {
     });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const submitOrder = async (data: any) => {
     setLoading(true);
     setError('');
 
     try {
       const order: Omit<Order, 'id' | 'createdAt'> = {
-        name: formData.name,
-        email: formData.email,
-        serviceType: formData.serviceType,
-        description: formData.description,
-        budget: formData.budget,
-        timeline: formData.timeline,
+        name: data.name,
+        email: data.email,
+        serviceType: data.serviceType,
+        description: data.description,
+        budget: data.budget,
+        timeline: data.timeline,
         status: 'new',
       };
 
       await createDocument<Order>('orders', order);
       setSuccess(true);
-      
       setTimeout(() => {
         router.push('/');
       }, 3000);
@@ -88,8 +84,7 @@ export default function OrderPage() {
   if (success) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <main className="flex-grow flex items-center justify-center bg-gradient-to-br from-black to-gray-900">
+        <main className="flex-grow flex items-center justify-center allow-video">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -115,12 +110,11 @@ export default function OrderPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
-      
-      <main className="flex-grow">
-        {/* Hero Section */}
-        <section className="bg-gradient-to-br from-black via-gray-900 to-black py-20">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <main className="flex-grow allow-video">
+        {/* Hero Section (Galaxy background behind title) */}
+        <section className="py-20 relative overflow-hidden">
+          {/* Galaxy removed */}
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -128,7 +122,7 @@ export default function OrderPage() {
               className="text-center"
             >
               <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
-                Request a <span className="bg-gradient-to-r from-gray-200 via-gray-100 to-gray-300 bg-clip-text text-transparent">Project</span>
+                Request a <span className="bg-clip-text text-transparent bg-gradient-to-r from-white/90 to-white/70">Project</span>
               </h1>
               <p className="text-xl text-gray-300">
                 Tell us about your project and we'll help bring it to life.
@@ -138,7 +132,10 @@ export default function OrderPage() {
         </section>
 
         {/* Form Section */}
-        <section className="py-20 bg-gradient-to-b from-gray-900 to-black">
+        <div className="relative">
+          {/* Galaxy removed */}
+          <div className="relative z-10">
+        <section className="py-20 bg-transparent">
           <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div
               initial={{ opacity: 0 }}
@@ -154,90 +151,13 @@ export default function OrderPage() {
                   </div>
                 )}
 
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <Input
-                    label="Full Name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    required
-                    placeholder="John Doe"
-                  />
-
-                  <Input
-                    label="Email"
-                    name="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    required
-                    placeholder="john@example.com"
-                  />
-
-                  <div>
-                    <label htmlFor="serviceType" className="block text-sm font-medium text-white mb-1">
-                      Type of Service
-                    </label>
-                    <select
-                      id="serviceType"
-                      name="serviceType"
-                      value={formData.serviceType}
-                      onChange={handleChange}
-                      required
-                      className="w-full px-4 py-2 bg-gray-800 border border-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                    >
-                      <option value="automation">Automation</option>
-                      <option value="website">Website Development</option>
-                      <option value="custom-software">Custom Software</option>
-                      <option value="consulting">Consulting</option>
-                      <option value="other">Other</option>
-                    </select>
-                  </div>
-
-                  <Textarea
-                    label="Project Description"
-                    name="description"
-                    value={formData.description}
-                    onChange={handleChange}
-                    required
-                    rows={6}
-                    placeholder="Describe your project in detail. What problem are you trying to solve? What features do you need?"
-                    helperText="Be as specific as possible to help us understand your needs"
-                  />
-
-                  <Input
-                    label="Budget Range"
-                    name="budget"
-                    value={formData.budget}
-                    onChange={handleChange}
-                    required
-                    placeholder="e.g., $5,000 - $10,000"
-                    helperText="Give us an idea of your budget for this project"
-                  />
-
-                  <Input
-                    label="Timeline"
-                    name="timeline"
-                    value={formData.timeline}
-                    onChange={handleChange}
-                    required
-                    placeholder="e.g., 2-3 months"
-                    helperText="When do you need this project completed?"
-                  />
-
-                  <Button
-                    type="submit"
-                    size="lg"
-                    className="w-full"
-                    isLoading={loading}
-                  >
-                    Submit Request
-                  </Button>
-                </form>
+                <OrderStepperForm onSubmit={submitOrder} loading={loading} />
               </Card>
             </motion.div>
           </div>
         </section>
+          </div>
+        </div>
       </main>
 
       <Footer />

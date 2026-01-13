@@ -3,7 +3,7 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Navbar } from '@/components/layout/Navbar';
+// Navbar provided by root layout
 import { Footer } from '@/components/layout/Footer';
 import { Card } from '@/components/ui/Card';
 import { LoadingSpinner } from '@/components/ui/Loading';
@@ -50,9 +50,21 @@ function TeamProfileContent() {
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <main className="flex-grow flex items-center justify-center">
-          <LoadingSpinner size="lg" />
+        <main className="flex-grow flex items-center justify-center relative">
+          <video
+            src="/panal_bg.mp4"
+            autoPlay
+            muted
+            loop
+            playsInline
+            aria-hidden="true"
+            className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+            style={{ opacity: 0.14, filter: 'blur(1px)' }}
+          />
+          <div className="absolute inset-0 bg-black/60 pointer-events-none" />
+          <div className="relative z-10">
+            <LoadingSpinner size="lg" />
+          </div>
         </main>
         <Footer />
       </div>
@@ -62,17 +74,29 @@ function TeamProfileContent() {
   if (error || !member) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <main className="flex-grow flex items-center justify-center">
-          <EmptyState
-            title="Member Not Found"
-            description="This team member profile could not be found."
-            icon={
-              <svg className="w-16 h-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            }
+        <main className="flex-grow flex items-center justify-center relative">
+          <video
+            src="/panal_bg.mp4"
+            autoPlay
+            muted
+            loop
+            playsInline
+            aria-hidden="true"
+            className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+            style={{ opacity: 0.14, filter: 'blur(1px)' }}
           />
+          <div className="absolute inset-0 bg-black/60 pointer-events-none" />
+          <div className="relative z-10">
+            <EmptyState
+              title="Member Not Found"
+              description="This team member profile could not be found."
+              icon={
+                <svg className="w-16 h-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              }
+            />
+          </div>
         </main>
         <Footer />
       </div>
@@ -81,10 +105,21 @@ function TeamProfileContent() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
-      <main className="flex-grow">
-        <section className="bg-gradient-to-br from-black via-gray-900 to-black py-16">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <main className="flex-grow relative">
+        <video
+          src="/panal_bg.mp4"
+          autoPlay
+          muted
+          loop
+          playsInline
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+          style={{ opacity: 0.14, filter: 'blur(1px)' }}
+        />
+        <div className="absolute inset-0 bg-black/60 pointer-events-none" />
+
+        <section className="py-16">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
               <div className="text-center">
                 {member.profilePicture ? (
@@ -107,8 +142,8 @@ function TeamProfileContent() {
             </motion.div>
           </div>
         </section>
-        <section className="py-16 bg-gradient-to-b from-gray-900 to-black">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="py-16">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="grid md:grid-cols-2 gap-8">
               <div className="space-y-6">
                 {member.visibility?.skills && member.skills && member.skills.length > 0 && (
